@@ -1,6 +1,7 @@
 // app/page.tsx (Dashboard)
 import { DollarSign, Smartphone, CircleDollarSign } from 'lucide-react';
 import { BalanceCard } from '@/components/dashboard/BalanceCard';
+import { CreditCard } from '@/components/dashboard/CreditCard';
 import { TotalBalance } from '@/components/dashboard/TotalBalance';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import Link from 'next/link';
@@ -42,10 +43,8 @@ export default function DashboardPage() {
         <p className="text-gray-600">Track your finances in real-time</p>
       </div>
 
-      <div className="grid gap-4 mb-8">
-        {accounts.map((account) => (
-          <BalanceCard key={account.title} {...account} />
-        ))}
+      <div className="mb-8">
+        <CreditCard />
       </div>
 
       <TotalBalance total={totalUsable} />

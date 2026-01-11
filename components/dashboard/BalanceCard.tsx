@@ -17,9 +17,9 @@ export function BalanceCard({ title, balance, icon: Icon, iconColor, bgColor }: 
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
           <p className="text-2xl font-bold text-gray-900">
-            {balance.toLocaleString('en-US', {
+            {balance.toLocaleString('fr-FR', {
               style: 'currency',
-              currency: 'USD',
+              currency: 'XAF',
               minimumFractionDigits: 0,
             })}
           </p>

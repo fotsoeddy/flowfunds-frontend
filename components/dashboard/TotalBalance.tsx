@@ -11,9 +11,9 @@ export function TotalBalance({ total }: TotalBalanceProps) {
       <div className="p-6">
         <p className="text-sm font-medium text-emerald-700">Total Usable Money</p>
         <p className="text-3xl font-bold text-emerald-900">
-          {total.toLocaleString('en-US', {
+          {total.toLocaleString('fr-FR', {
             style: 'currency',
-            currency: 'USD',
+            currency: 'XAF',
             minimumFractionDigits: 0,
           })}
         </p>
