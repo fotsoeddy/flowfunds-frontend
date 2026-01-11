@@ -27,6 +27,21 @@ interface Transaction {
 export function TransactionList() {
   const [filter, setFilter] = useState<'all' | 'income' | 'expense' | 'save'>('all');
   const [search, setSearch] = useState('');
+  const [monthFilter, setMonthFilter] = useState<string>('all');
+
+  // Get unique months from transactions
+  const getAvailableMonths = () => {
+    const months = new Set<string>();
+    transactions.forEach(t => {
+      const monthYear = new Date(t.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      months.add(monthYear);
+    });
+    return Array.from(months).sort((a, b) => {
+      const dateA = new Date(a);
+      const dateB = new Date(b);
+      return dateB.getTime() - dateA.getTime();
+    });
+  };
 
   // Mock data
   const transactions: Transaction[] = [
@@ -94,6 +109,10 @@ export function TransactionList() {
   const filteredTransactions = transactions.filter((transaction) => {
     if (filter !== 'all' && transaction.type !== filter) return false;
     if (search && !transaction.reason.toLowerCase().includes(search.toLowerCase())) return false;
+    if (monthFilter !== 'all') {
+      const transactionMonth = new Date(transaction.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      if (transactionMonth !== monthFilter) return false;
+    }
     return true;
   });
 
@@ -140,28 +159,43 @@ export function TransactionList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search transactions..."
-            className="pl-10"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search transactions..."
+              className="pl-10"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
+            <SelectTrigger className="w-[120px]">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <SelectValue placeholder="Filter" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="income">Income</SelectItem>
+              <SelectItem value="expense">Expense</SelectItem>
+              <SelectItem value="save">Save</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
-          <SelectTrigger className="w-[120px]">
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              <SelectValue placeholder="Filter" />
-            </div>
+        
+        {/* Monthly Filter */}
+        <Select value={monthFilter} onValueChange={setMonthFilter}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select Month" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="income">Income</SelectItem>
-            <SelectItem value="expense">Expense</SelectItem>
-            <SelectItem value="save">Save</SelectItem>
+            <SelectItem value="all">All Months</SelectItem>
+            {getAvailableMonths().map((month) => (
+              <SelectItem key={month} value={month}>{month}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

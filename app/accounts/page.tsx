@@ -1,6 +1,7 @@
 // app/accounts/page.tsx
 import { DollarSign, Smartphone, CircleDollarSign, Building } from 'lucide-react';
 import { AccountCard } from '@/components/accounts/AccountCard';
+import { CreditCardFront } from '@/components/dashboard/CreditCardFront';
 
 export default function AccountsPage() {
   const activeAccounts = [
@@ -40,6 +41,12 @@ export default function AccountsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Accounts</h1>
         <p className="text-gray-600">Manage your money across accounts</p>
+      </div>
+
+      {/* Credit Card Section */}
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">My Card</h2>
+        <CreditCardFront />
       </div>
 
       <div className="rounded-lg bg-gray-50 p-4 mb-6">

@@ -9,6 +9,17 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'FlowFunds - Personal Finance Tracker',
   description: 'Track your income, expenses, and savings effortlessly',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/icons/icon-192.png',
+    apple: '/icons/icon-192.png',
+  },
+  themeColor: '#10B981',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'FlowFunds',
+  },
 };
 
 export default function RootLayout({

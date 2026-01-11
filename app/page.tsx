@@ -43,8 +43,10 @@ export default function DashboardPage() {
         <p className="text-gray-600">Track your finances in real-time</p>
       </div>
 
-      <div className="mb-8">
-        <CreditCard />
+      <div className="grid gap-4 mb-8">
+        {accounts.map((account) => (
+          <BalanceCard key={account.title} {...account} />
+        ))}
       </div>
 
       <TotalBalance total={totalUsable} />
