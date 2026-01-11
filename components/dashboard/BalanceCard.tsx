@@ -1,16 +1,18 @@
 // components/dashboard/BalanceCard.tsx
 import { Card } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
+import Image from 'next/image';
 
 interface BalanceCardProps {
   title: string;
   balance: number;
-  icon: LucideIcon;
-  iconColor: string;
+  icon?: LucideIcon;
+  iconColor?: string;
   bgColor: string;
+  imageSrc?: string;
 }
 
-export function BalanceCard({ title, balance, icon: Icon, iconColor, bgColor }: BalanceCardProps) {
+export function BalanceCard({ title, balance, icon: Icon, iconColor, bgColor, imageSrc }: BalanceCardProps) {
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between">
@@ -24,8 +26,14 @@ export function BalanceCard({ title, balance, icon: Icon, iconColor, bgColor }: 
             })}
           </p>
         </div>
-        <div className={`${bgColor} rounded-lg p-3`}>
-          <Icon className={`h-6 w-6 ${iconColor}`} />
+        <div className={imageSrc ? 'rounded-lg p-3' : `${bgColor} rounded-lg p-3`}>
+          {imageSrc ? (
+            <div className="h-8 w-8 relative">
+              <Image src={imageSrc} alt={title} fill className="object-contain" />
+            </div>
+          ) : Icon ? (
+            <Icon className={`h-6 w-6 ${iconColor}`} />
+          ) : null}
         </div>
       </div>
     </Card>

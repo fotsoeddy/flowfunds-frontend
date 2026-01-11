@@ -14,23 +14,20 @@ export default function DashboardPage() {
     {
       title: 'Cash',
       balance: 1250,
-      icon: DollarSign,
-      iconColor: 'text-emerald-600',
       bgColor: 'bg-emerald-100',
+      imageSrc: '/cash.png',
     },
     {
       title: 'MoMo',
       balance: 875,
-      icon: Smartphone,
-      iconColor: 'text-purple-600',
       bgColor: 'bg-purple-100',
+      imageSrc: '/momo_logo.png',
     },
     {
       title: 'Orange Money',
       balance: 420,
-      icon: CircleDollarSign,
-      iconColor: 'text-orange-600',
       bgColor: 'bg-orange-100',
+      imageSrc: '/om_logo.png',
     },
   ];
 

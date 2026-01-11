@@ -14,12 +14,15 @@ export const metadata: Metadata = {
     icon: '/icons/icon-192.png',
     apple: '/icons/icon-192.png',
   },
-  themeColor: '#10B981',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'FlowFunds',
   },
+};
+
+export const viewport = {
+  themeColor: '#10B981',
 };
 
 export default function RootLayout({

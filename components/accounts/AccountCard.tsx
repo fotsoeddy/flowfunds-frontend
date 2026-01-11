@@ -18,7 +18,11 @@ export function AccountCard({ id, name, balance, icon: Icon, isActive = true }: 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="bg-gray-100 rounded-lg p-3 relative">
-            {id === 'momo' ? (
+            {id === 'cash' ? (
+              <div className="h-6 w-6 relative">
+                <Image src="/cash.png" alt="Cash" fill className="object-contain" />
+              </div>
+            ) : id === 'momo' ? (
               <div className="h-6 w-6 relative">
                 <Image src="/momo_logo.png" alt="MoMo" fill className="object-contain" />
               </div>
