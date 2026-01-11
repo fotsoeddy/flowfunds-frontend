@@ -9,7 +9,7 @@ export function Header() {
   // Mock user data - in real app, this would come from auth context
   const user = {
     name: 'Eddy Fotso',
-    initials: 'EF',
+    profileImage: '/profile-placeholder.png', // You can replace with actual user image
   };
 
   return (
@@ -30,8 +30,10 @@ export function Header() {
               <span className="text-sm font-semibold text-gray-900">{user.name}</span>
               <span className="text-xs text-gray-500">View Profile</span>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-white font-semibold">
-              {user.initials}
+            <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-emerald-600 bg-gray-100">
+              <div className="relative h-full w-full">
+                <User className="h-full w-full p-2 text-gray-400" />
+              </div>
             </div>
           </div>
         </Link>

@@ -57,7 +57,40 @@ export function UserInfoSection() {
         )}
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
+        {/* Profile Picture Section */}
+        <div className="flex flex-col items-center gap-4 pb-6 border-b">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-emerald-600 bg-gray-100">
+              <div className="relative h-full w-full flex items-center justify-center">
+                <User className="h-16 w-16 text-gray-400" />
+              </div>
+            </div>
+            {isEditing && (
+              <label
+                htmlFor="profile-picture"
+                className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-emerald-600 flex items-center justify-center cursor-pointer hover:bg-emerald-700 transition-colors"
+              >
+                <Edit2 className="h-4 w-4 text-white" />
+                <input
+                  id="profile-picture"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    // Handle image upload
+                    console.log('Image selected:', e.target.files?.[0]);
+                  }}
+                />
+              </label>
+            )}
+          </div>
+          {isEditing && (
+            <p className="text-sm text-gray-600">Click the icon to upload a new photo</p>
+          )}
+        </div>
+
+        {/* User Info Fields */}
         <div className="space-y-2">
           <Label htmlFor="name" className="flex items-center gap-2 text-gray-700">
             <User className="h-4 w-4" />
