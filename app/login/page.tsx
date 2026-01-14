@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, ArrowRight } from "lucide-react";
+import { Lock, Smartphone, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import api from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [phone_number, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,11 +21,22 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     
-    // Mock login delay
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Use the api service to login
+      const response = await api.post("/auth/login/", { phone_number, password });
+      
+      // Store tokens in sessionStorage as requested
+      sessionStorage.setItem("access_token", response.data.access);
+      sessionStorage.setItem("refresh_token", response.data.refresh);
+      
+      toast.success("Logged in successfully!");
       router.push("/");
-    }, 1000);
+    } catch (err: any) {
+      console.error("Login error:", err);
+      const errorMessage = err.response?.data?.detail || "Failed to login. Please check your credentials.";
+      toast.error(errorMessage);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -32,22 +45,23 @@ export default function LoginPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center text-emerald-700">FlowFunds</CardTitle>
           <CardDescription className="text-center">
-            Enter your email to sign in to your account
+            Enter your phone number to sign in
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="phone_number">Phone Number</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Smartphone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input 
-                  id="email" 
-                  placeholder="name@example.com" 
-                  type="email" 
+                  id="phone_number" 
+                  placeholder="600000000" 
+                  type="tel" 
                   className="pl-10"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={phone_number}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
                   required
                 />
               </div>

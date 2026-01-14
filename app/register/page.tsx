@@ -5,15 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, User, ArrowRight } from "lucide-react";
+import { Lock, User, ArrowRight, DollarSign, Smartphone } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import api from "@/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    first_name: "",
+    phone_number: "",
+    initial_amount: "",
     password: "",
     confirmPassword: "",
   });
@@ -27,12 +30,40 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Mock registration delay
-    setTimeout(() => {
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
       setIsLoading(false);
+      return;
+    }
+    
+    try {
+      await api.post("/auth/register/", {
+        phone_number: formData.phone_number,
+        first_name: formData.first_name,
+        initial_amount: formData.initial_amount,
+        password: formData.password,
+      });
+      
+      toast.success("Account created successfully!");
+      // Redirect to login on success
       router.push("/login");
-    }, 1000);
+    } catch (err: any) {
+      console.error("Registration error:", err);
+      // Handle array of errors or simple message
+      const detail = err.response?.data;
+      let message = "Failed to register.";
+      
+      if (typeof detail === 'object') {
+        // Simple way to format object errors
+        message = Object.entries(detail).map(([key, val]) => `${key}: ${val}`).join(", ");
+      } else if (typeof detail === 'string') {
+        message = detail;
+      }
+      
+      toast.error(message);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -46,31 +77,49 @@ export default function RegisterPage() {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="first_name">First Name</Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input 
-                  id="name" 
-                  placeholder="John Doe" 
+                  id="first_name" 
+                  placeholder="John" 
                   type="text" 
                   className="pl-10"
-                  value={formData.name}
+                  value={formData.first_name}
                   onChange={handleChange}
                   required
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="phone_number">Phone Number</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Smartphone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input 
-                  id="email" 
-                  placeholder="name@example.com" 
-                  type="email" 
+                  id="phone_number" 
+                  placeholder="600000000" 
+                  type="tel" 
                   className="pl-10"
-                  value={formData.email}
+                  value={formData.phone_number}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="initial_amount">Initial Balance (XAF)</Label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input 
+                  id="initial_amount" 
+                  placeholder="50000" 
+                  type="number" 
+                  min="0"
+                  step="0.01"
+                  className="pl-10"
+                  value={formData.initial_amount}
                   onChange={handleChange}
                   required
                 />

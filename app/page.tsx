@@ -1,14 +1,35 @@
-// app/page.tsx (Dashboard)
-import { DollarSign, Smartphone, CircleDollarSign } from 'lucide-react';
+"use client";
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { DollarSign, Smartphone, CircleDollarSign, PlusCircle, CreditCard } from 'lucide-react';
 import { BalanceCard } from '@/components/dashboard/BalanceCard';
-import { CreditCard } from '@/components/dashboard/CreditCard';
 import { TotalBalance } from '@/components/dashboard/TotalBalance';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check for authentication token
+    if (typeof window !== 'undefined') {
+      const token = sessionStorage.getItem('access_token');
+      if (!token) {
+        router.push('/login');
+      } else {
+        setIsAuthenticated(true);
+      }
+    }
+  }, [router]);
+
+  // Prevent flash of content before redirect
+  if (!isAuthenticated) {
+    return null; // Or a loading spinner
+  }
+
   // Mock data
   const accounts = [
     {
