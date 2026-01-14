@@ -1,9 +1,34 @@
-// app/accounts/page.tsx
-import { DollarSign, Smartphone, CircleDollarSign, Building } from 'lucide-react';
+"use client";
+
+import { DollarSign, Smartphone, CircleDollarSign, Building, LogOut } from 'lucide-react';
 import { AccountCard } from '@/components/accounts/AccountCard';
 import { CreditCardFront } from '@/components/dashboard/CreditCardFront';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function AccountsPage() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = sessionStorage.getItem('access_token');
+      if (!token) {
+        router.push('/login');
+      } else {
+        setIsAuthenticated(true);
+      }
+    }
+  }, [router]);
+
+  const handleLogout = () => {
+    sessionStorage.clear();
+    router.push('/login');
+  };
+
+  if (!isAuthenticated) return null;
+
   const activeAccounts = [
     {
       id: 'cash' as const,
@@ -38,9 +63,20 @@ export default function AccountsPage() {
 
   return (
     <div className="container px-4 py-6 pb-20">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Accounts</h1>
-        <p className="text-gray-600">Manage your money across accounts</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Accounts</h1>
+          <p className="text-gray-600">Manage your money across accounts</p>
+        </div>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={handleLogout} 
+          className="text-gray-500 hover:text-red-600 hover:bg-red-50"
+        >
+          <LogOut className="h-6 w-6" />
+          <span className="sr-only">Logout</span>
+        </Button>
       </div>
 
       {/* Credit Card Section */}

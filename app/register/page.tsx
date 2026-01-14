@@ -10,6 +10,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import Image from "next/image";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -69,7 +70,16 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
+        <CardHeader className="space-y-1 flex flex-col items-center">
+          <div className="w-20 h-20 relative mb-2">
+            <Image 
+              src="/logo/logo.png" 
+              alt="FlowFunds Logo" 
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
           <CardTitle className="text-2xl font-bold text-center text-emerald-700">Create Account</CardTitle>
           <CardDescription className="text-center">
             Join FlowFunds to track your finances today

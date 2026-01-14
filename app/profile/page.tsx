@@ -1,11 +1,29 @@
-// app/profile/page.tsx
+"use client";
+
 import { UserInfoSection } from '@/components/profile/UserInfoSection';
 import { LinkedAccountsSection } from '@/components/profile/LinkedAccountsSection';
 import { SecuritySection } from '@/components/profile/SecuritySection';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = sessionStorage.getItem('access_token');
+      if (!token) {
+        router.push('/login');
+      } else {
+        setIsAuthenticated(true);
+      }
+    }
+  }, [router]);
+
+  if (!isAuthenticated) return null;
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       <div className="container px-4 py-6 max-w-2xl mx-auto">

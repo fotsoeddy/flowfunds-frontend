@@ -15,6 +15,10 @@ const navItems = [
 export function Navigation() {
   const pathname = usePathname();
 
+  if (pathname === '/login' || pathname === '/register') {
+    return null;
+  }
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white py-2">
       <div className="grid grid-cols-4">
