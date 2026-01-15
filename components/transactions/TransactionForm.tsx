@@ -1,7 +1,5 @@
 // components/transactions/TransactionForm.tsx
-'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,216 +11,184 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import { ArrowUpCircle, ArrowDownCircle, PiggyBank, DollarSign } from 'lucide-react';
-import { TransactionType, AccountType } from '@/types/transaction';
-import Image from 'next/image';
+import { ArrowLeft, Loader2, PiggyBank } from 'lucide-react'; // Added PiggyBank for Save banner
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import api from '@/lib/api';
+import { toast } from 'sonner';
 
 export function TransactionForm() {
-  const [type, setType] = useState<TransactionType>('expense');
-  const [amount, setAmount] = useState('');
-  const [account, setAccount] = useState<AccountType>('cash');
-  const [category, setCategory] = useState('');
-  const [reason, setReason] = useState('');
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [formData, setFormData] = useState({
+    type: 'expense',
+    amount: '',
+    category: '',
+    reason: '',
+    accountId: '',
+    date: new Date().toISOString().split('T')[0],
+  });
 
-  const expenseCategories = [
-    'Food & Dining',
-    'Transportation',
-    'Shopping',
-    'Entertainment',
-    'Bills & Utilities',
-    'Healthcare',
-    'Other',
-  ];
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const response = await api.getAccounts();
+        setAccounts(response.data);
+        if (response.data.length > 0) {
+            // Default to first account
+            setFormData(prev => ({ ...prev, accountId: response.data[0].id }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch accounts', error);
+        toast.error('Failed to load accounts');
+      }
+    };
+    fetchAccounts();
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would submit to backend
-    console.log({ type, amount, account, category, reason });
-    
-    // Reset form
-    setAmount('');
-    setCategory('');
-    setReason('');
-  };
+    setLoading(true);
 
-  const typeConfig = {
-    income: {
-      icon: ArrowUpCircle,
-      color: 'text-emerald-600',
-      bgColor: 'bg-emerald-50',
-      borderColor: 'border-emerald-200',
-      label: 'Income',
-    },
-    expense: {
-      icon: ArrowDownCircle,
-      color: 'text-rose-600',
-      bgColor: 'bg-rose-50',
-      borderColor: 'border-rose-200',
-      label: 'Expense',
-    },
-    save: {
-      icon: PiggyBank,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
-      label: 'Save',
-    },
-  };
+    try {
+      const payload = {
+          type: formData.type,
+          amount: Number(formData.amount),
+          category: formData.category,
+          reason: formData.reason,
+          account_id: formData.accountId,
+          date: new Date(formData.date).toISOString(),
+      };
 
-  const config = typeConfig[type];
-  const Icon = config.icon;
+      await api.createTransaction(payload);
+      toast.success('Transaction added successfully');
+      router.push('/transactions');
+    } catch (error: any) {
+      console.error('Transaction failed:', error);
+      if (error.response?.data) {
+          const message = typeof error.response.data === 'string' 
+            ? error.response.data 
+            : Object.values(error.response.data).flat().join(', ');
+          toast.error(message || 'Failed to add transaction');
+      } else {
+          toast.error('Failed to add transaction');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-24">
-      <div className="container px-4 py-8 max-w-lg mx-auto">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 mb-4">
-            <Icon className="h-8 w-8 text-emerald-600" />
+    <div className="p-4 max-w-lg mx-auto">
+      <div className="flex items-center gap-4 mb-6">
+        <Link href="/">
+          <Button variant="ghost" size="icon">
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+        </Link>
+        <h1 className="text-2xl font-bold text-gray-900">Add Transaction</h1>
+      </div>
+
+      <Card className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label>Transaction Type</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                type="button"
+                variant={formData.type === 'expense' ? 'default' : 'outline'}
+                className={formData.type === 'expense' ? 'bg-rose-600 hover:bg-rose-700' : ''}
+                onClick={() => setFormData({ ...formData, type: 'expense' })}
+              >
+                Expense
+              </Button>
+              <Button
+                type="button"
+                variant={formData.type === 'income' ? 'default' : 'outline'}
+                className={formData.type === 'income' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                onClick={() => setFormData({ ...formData, type: 'income' })}
+              >
+                Income
+              </Button>
+              <Button
+                type="button"
+                variant={formData.type === 'save' ? 'default' : 'outline'}
+                className={formData.type === 'save' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                onClick={() => setFormData({ ...formData, type: 'save' })}
+              >
+                Savings
+              </Button>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Add {config.label}</h1>
-          <p className="text-gray-600 mt-2">Track your financial activity</p>
-        </div>
-        
-        {/* Type Selector */}
-        <Card className="p-2 mb-6">
-          <Tabs value={type} onValueChange={(v) => setType(v as TransactionType)} className="w-full">
-            <TabsList className="grid grid-cols-3 w-full h-auto p-1">
-              <TabsTrigger 
-                value="income" 
-                className="flex flex-col items-center gap-2 py-3"
-              >
-                <ArrowUpCircle className="h-5 w-5" />
-                <span className="text-xs font-medium">Income</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="expense" 
-                className="flex flex-col items-center gap-2 py-3"
-              >
-                <ArrowDownCircle className="h-5 w-5" />
-                <span className="text-xs font-medium">Expense</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="save" 
-                className="flex flex-col items-center gap-2 py-3"
-              >
-                <PiggyBank className="h-5 w-5" />
-                <span className="text-xs font-medium">Save</span>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </Card>
 
-        {/* Form Card */}
-        <Card className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Amount Input */}
-            <div className="space-y-3">
-              <Label htmlFor="amount" className="text-base font-semibold text-gray-700">
-                Amount (CFA)
-              </Label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <Input
-                  id="amount"
-                  type="number"
-                  placeholder="0"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  required
-                  className="pl-10 text-2xl font-bold h-14 border-2 focus:border-emerald-500"
-                />
-              </div>
-            </div>
-
-            {/* Account Selector */}
-            <div className="space-y-3">
-              <Label htmlFor="account" className="text-base font-semibold text-gray-700">
-                {type === 'save' ? 'From Account' : 'Account'}
-              </Label>
-              <Select value={account} onValueChange={(v) => setAccount(v as AccountType)}>
-                <SelectTrigger className="h-12 border-2">
-                  <SelectValue placeholder="Select account" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cash">
-                    <div className="flex items-center gap-3">
-                      <div className="h-6 w-6 relative">
-                        <Image src="/cash.png" alt="Cash" fill className="object-contain" />
-                      </div>
-                      <span className="font-medium">Cash</span>
-                    </div>
+          <div className="space-y-2">
+            <Label htmlFor="account">Account</Label>
+            <Select
+              value={formData.accountId}
+              onValueChange={(value) => setFormData({ ...formData, accountId: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select account" />
+              </SelectTrigger>
+              <SelectContent>
+                {accounts.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.name} ({account.type}) - {account.balance.toLocaleString()} {account.currency}
                   </SelectItem>
-                  <SelectItem value="momo">
-                    <div className="flex items-center gap-3">
-                      <div className="h-6 w-6 relative">
-                        <Image src="/momo_logo.png" alt="MoMo" fill className="object-contain" />
-                      </div>
-                      <span className="font-medium">MoMo</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="om">
-                    <div className="flex items-center gap-3">
-                      <div className="h-6 w-6 relative">
-                        <Image src="/om_logo.png" alt="Orange Money" fill className="object-contain" />
-                      </div>
-                      <span className="font-medium">Orange Money</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            {/* Category (Expense only) */}
-            {type === 'expense' && (
-              <div className="space-y-3">
-                <Label htmlFor="category" className="text-base font-semibold text-gray-700">
-                  Category
-                </Label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="h-12 border-2">
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {expenseCategories.map((cat) => (
-                      <SelectItem key={cat} value={cat.toLowerCase().replace(/ & /g, '-')}>
-                        {cat}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+          <div className="space-y-2">
+            <Label htmlFor="amount">Amount</Label>
+            <Input
+              id="amount"
+              type="number"
+              placeholder="0"
+              value={formData.amount}
+              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              required
+              min="1"
+            />
+          </div>
 
-            {/* Reason */}
-            <div className="space-y-3">
-              <Label htmlFor="reason" className="text-base font-semibold text-gray-700">
-                Description
-              </Label>
-              <Input
-                id="reason"
-                placeholder={
-                  type === 'income' 
-                    ? 'Salary, Freelance, Gift...' 
-                    : type === 'save'
-                    ? 'Vacation, Emergency Fund...'
-                    : 'What was this for?'
-                }
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                required
-                className="h-12 border-2"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="category">Category</Label>
+            <Input
+              id="category"
+              placeholder="e.g., Food, Transport, Salary"
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              required={formData.type === 'expense'} 
+            />
+          </div>
 
-            {/* Save Info Banner */}
-            {type === 'save' && (
+          <div className="space-y-2">
+            <Label htmlFor="reason">Reason/Description</Label>
+            <Input
+              id="reason"
+              placeholder="e.g., Lunch at restaurant"
+              value={formData.reason}
+              onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="date">Date</Label>
+            <Input
+              id="date"
+              type="date"
+              value={formData.date}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              required
+            />
+          </div>
+
+           {/* Save Info Banner */}
+            {formData.type === 'save' && (
               <div className="rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 p-4 border-2 border-blue-200">
                 <div className="flex items-start gap-3">
                   <PiggyBank className="h-5 w-5 text-blue-600 mt-0.5" />
@@ -231,23 +197,22 @@ export function TransactionForm() {
                       Destination: Bank (Savings)
                     </p>
                     <p className="text-xs text-blue-700 mt-1">
-                      Savings automatically go to your bank account
+                      Savings will be deducted from your chosen account.
                     </p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Submit Button */}
-            <Button 
-              type="submit" 
-              className="w-full h-14 text-lg font-semibold bg-emerald-600 hover:bg-emerald-700"
-            >
-              Add {config.label}
-            </Button>
-          </form>
-        </Card>
-      </div>
+          <Button 
+            type="submit" 
+            className="w-full bg-emerald-600 hover:bg-emerald-700"
+            disabled={loading || !formData.accountId}
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add Transaction'}
+          </Button>
+        </form>
+      </Card>
     </div>
   );
 }

@@ -1,10 +1,9 @@
 // components/transactions/TransactionList.tsx
-'use client';
-
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { ArrowUpRight, ArrowDownLeft, PiggyBank, Search, Filter } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -12,29 +11,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowUpCircle, ArrowDownCircle, PiggyBank, Search, Filter } from 'lucide-react';
-
-interface Transaction {
-  id: number;
-  type: 'income' | 'expense' | 'save';
-  amount: number;
-  account: 'cash' | 'momo' | 'om';
-  reason: string;
-  date: Date;
-  category?: string;
-}
+import api from '@/lib/api';
+import { toast } from 'sonner';
 
 export function TransactionList() {
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'income' | 'expense' | 'save'>('all');
   const [search, setSearch] = useState('');
   const [monthFilter, setMonthFilter] = useState<string>('all');
 
-  // Get unique months from transactions
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const fetchTransactions = async () => {
+    try {
+      const response = await api.getTransactions();
+      setTransactions(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Failed to fetch transactions', error);
+      toast.error('Failed to load transactions');
+      setLoading(false);
+    }
+  };
+
   const getAvailableMonths = () => {
+    // If no transactions, return empty
+    if (!transactions.length) return [];
+    
     const months = new Set<string>();
     transactions.forEach(t => {
-      const monthYear = new Date(t.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      months.add(monthYear);
+      if (t.date) {
+        const monthYear = new Date(t.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        months.add(monthYear);
+      }
     });
     return Array.from(months).sort((a, b) => {
       const dateA = new Date(a);
@@ -43,72 +55,16 @@ export function TransactionList() {
     });
   };
 
-  // Mock data
-  const transactions: Transaction[] = [
-    {
-      id: 1,
-      type: 'expense',
-      amount: 45.99,
-      account: 'momo',
-      reason: 'Grocery shopping',
-      date: new Date('2024-01-15'),
-      category: 'Food',
-    },
-    {
-      id: 2,
-      type: 'income',
-      amount: 1200,
-      account: 'cash',
-      reason: 'Freelance payment',
-      date: new Date('2024-01-14'),
-    },
-    {
-      id: 3,
-      type: 'save',
-      amount: 200,
-      account: 'om',
-      reason: 'Emergency fund',
-      date: new Date('2024-01-13'),
-    },
-    {
-      id: 4,
-      type: 'expense',
-      amount: 25.5,
-      account: 'cash',
-      reason: 'Coffee with friends',
-      date: new Date('2024-01-12'),
-      category: 'Food',
-    },
-    {
-      id: 5,
-      type: 'expense',
-      amount: 89.99,
-      account: 'momo',
-      reason: 'Amazon purchase',
-      date: new Date('2024-01-11'),
-      category: 'Shopping',
-    },
-    {
-      id: 6,
-      type: 'income',
-      amount: 500,
-      account: 'momo',
-      reason: 'Client project',
-      date: new Date('2024-01-10'),
-    },
-    {
-      id: 7,
-      type: 'save',
-      amount: 150,
-      account: 'cash',
-      reason: 'Vacation fund',
-      date: new Date('2024-01-09'),
-    },
-  ];
-
   const filteredTransactions = transactions.filter((transaction) => {
     if (filter !== 'all' && transaction.type !== filter) return false;
-    if (search && !transaction.reason.toLowerCase().includes(search.toLowerCase())) return false;
+    
+    if (search) {
+      const searchLower = search.toLowerCase();
+      const reasonsMatch = transaction.reason?.toLowerCase().includes(searchLower);
+      const categoryMatch = transaction.category?.toLowerCase().includes(searchLower);
+      if (!reasonsMatch && !categoryMatch) return false;
+    }
+
     if (monthFilter !== 'all') {
       const transactionMonth = new Date(transaction.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
       if (transactionMonth !== monthFilter) return false;
@@ -116,78 +72,85 @@ export function TransactionList() {
     return true;
   });
 
-  const typeConfig = {
-    income: {
-      icon: ArrowUpCircle,
-      color: 'text-emerald-600',
-      bgColor: 'bg-emerald-50',
-      prefix: '+',
-      label: 'Income',
-    },
-    expense: {
-      icon: ArrowDownCircle,
-      color: 'text-rose-600',
-      bgColor: 'bg-rose-50',
-      prefix: '-',
-      label: 'Expense',
-    },
-    save: {
-      icon: PiggyBank,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      prefix: '→',
-      label: 'Save',
-    },
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'income':
+        return <ArrowUpRight className="h-5 w-5 text-emerald-600" />;
+      case 'expense':
+        return <ArrowDownLeft className="h-5 w-5 text-rose-600" />;
+      case 'save':
+        return <PiggyBank className="h-5 w-5 text-blue-600" />;
+      default:
+        return <ArrowDownLeft className="h-5 w-5 text-gray-600" />;
+    }
   };
 
-  const formatAccount = (acc: string) => {
-    const names: Record<string, string> = {
-      cash: 'Cash',
-      momo: 'MoMo',
-      om: 'Orange Money',
-    };
-    return names[acc] || acc;
+  const getBgColor = (type: string) => {
+    switch (type) {
+      case 'income':
+        return 'bg-emerald-100';
+      case 'expense':
+        return 'bg-rose-100';
+      case 'save':
+        return 'bg-blue-100';
+      default:
+        return 'bg-gray-100';
+    }
   };
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+  const formatAccount = (acc: any) => {
+      // Handle cases where account might be an object or string
+      if (typeof acc === 'string') {
+          const names: Record<string, string> = {
+            cash: 'Cash',
+            momo: 'MoMo',
+            om: 'Orange Money',
+          };
+          return names[acc] || acc;
+      }
+      return acc?.name || 'Account';
   };
+
+  if (loading) {
+     return <div className="text-center py-10">Loading transactions...</div>;
+  }
+
+  // Calculate total balance of filtered transactions or just use a placeholder logic
+  // Real app might want cumulative balance, but here maybe just sum the visible ones?
+  // Let's stick to simple display as per user request.
 
   return (
     <div className="space-y-4">
+      {/* Search and Filter */}
       <div className="flex flex-col gap-2">
         <div className="flex gap-2">
-          <div className="flex-1 relative">
+            <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search transactions..."
-              className="pl-10"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+            <Input 
+                placeholder="Search transactions..." 
+                className="pl-9 bg-white"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
             />
-          </div>
-          <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
-            <SelectTrigger className="w-[120px]">
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                <SelectValue placeholder="Filter" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="income">Income</SelectItem>
-              <SelectItem value="expense">Expense</SelectItem>
-              <SelectItem value="save">Save</SelectItem>
-            </SelectContent>
-          </Select>
+            </div>
+            <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
+                <SelectTrigger className="w-[120px]">
+                    <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4" />
+                        <SelectValue placeholder="Filter" />
+                    </div>
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="income">Income</SelectItem>
+                    <SelectItem value="expense">Expense</SelectItem>
+                    <SelectItem value="save">Save</SelectItem>
+                </SelectContent>
+            </Select>
         </div>
         
-        {/* Monthly Filter */}
-        <Select value={monthFilter} onValueChange={setMonthFilter}>
+         {/* Monthly Filter */}
+         <Select value={monthFilter} onValueChange={setMonthFilter}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select Month" />
           </SelectTrigger>
@@ -201,71 +164,53 @@ export function TransactionList() {
       </div>
 
       {filteredTransactions.length === 0 ? (
-        <Card className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-            <Search className="h-6 w-6 text-gray-400" />
-          </div>
-          <h3 className="font-medium text-gray-900">No transactions found</h3>
-          <p className="mt-1 text-sm text-gray-600">
-            Try adjusting your search or filter
-          </p>
-        </Card>
+          <Card className="p-8 text-center text-gray-500">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+                 <Search className="h-6 w-6 text-gray-400" />
+              </div>
+              <h3 className="font-medium text-gray-900">No transactions found</h3>
+              <p className="mt-1 text-sm text-gray-600">
+                Try adjusting your search or filter
+              </p>
+          </Card>
       ) : (
-        <Card>
-          <div className="divide-y">
-            {filteredTransactions.map((transaction) => {
-              const config = typeConfig[transaction.type];
-              const Icon = config.icon;
-
-              return (
-                <div key={transaction.id} className="flex items-center justify-between p-4">
+          <div className="space-y-3">
+            {filteredTransactions.map((transaction) => (
+              <Card key={transaction.id} className="p-4">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`${config.bgColor} rounded-lg p-2`}>
-                      <Icon className={`h-5 w-5 ${config.color}`} />
+                    <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getBgColor(transaction.type)}`}>
+                      {getIcon(transaction.type)}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">{transaction.reason}</p>
+                      <p className="font-semibold text-gray-900">{transaction.reason || transaction.category || 'Transaction'}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs font-medium px-2 py-1 rounded bg-gray-100 text-gray-600">
-                          {formatAccount(transaction.account)}
-                        </span>
-                        {transaction.category && (
-                          <span className="text-xs text-gray-500">• {transaction.category}</span>
-                        )}
+                         <span className="text-xs font-medium px-2 py-1 rounded bg-gray-100 text-gray-600">
+                           {formatAccount(transaction.account)}
+                         </span>
+                         {transaction.category && (
+                           <span className="text-xs text-gray-500">• {transaction.category}</span>
+                         )}
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
-                        {formatDate(transaction.date)}
+                        {new Date(transaction.date).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`font-bold ${config.color}`}>
-                      {config.prefix}${transaction.amount.toFixed(2)}
+                    <p className={`font-bold ${
+                      transaction.type === 'income' ? 'text-emerald-600' : 
+                      transaction.type === 'expense' ? 'text-rose-600' : 'text-blue-600'
+                    }`}>
+                      {transaction.type === 'income' ? '+' : '-'} {Number(transaction.amount).toLocaleString()} CFA
                     </p>
-                    <p className="text-xs text-gray-500 mt-1 capitalize">
-                      {transaction.type}
-                    </p>
+                    <p className="text-xs text-gray-500 capitalize">{transaction.type}</p>
                   </div>
                 </div>
-              );
-            })}
+              </Card>
+            ))}
           </div>
-        </Card>
       )}
-
-      <div className="rounded-lg bg-gray-50 p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-900">Total Balance</p>
-            <p className="text-2xl font-bold text-emerald-700">
-              $1,789.50
-            </p>
-          </div>
-          <Button variant="outline" size="sm">
-            Export CSV
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }

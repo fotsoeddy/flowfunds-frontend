@@ -45,5 +45,7 @@ api.login = (data: any) => axiosInstance.post("/auth/login/", data);
 api.register = (data: any) => axiosInstance.post("/auth/register/", data);
 api.getProfile = () => axiosInstance.get("/auth/me/");
 api.getAccounts = () => axiosInstance.get("/accounts/");
+api.getTransactions = () => axiosInstance.get("/transactions/");
+api.createTransaction = (data: any) => axiosInstance.post("/transactions/", data);
 
 export default api;
