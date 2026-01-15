@@ -9,20 +9,32 @@ const defaultData = {
 interface CreditCardFrontProps {
   cardNumber?: string;
   expiryDate?: string;
+  holderName?: string;
 }
 
-export function CreditCardFront({ cardNumber, expiryDate }: CreditCardFrontProps) {
+export function CreditCardFront({ cardNumber, expiryDate, holderName }: CreditCardFrontProps) {
   const [creditCardDetails, setCreditCardDetails] = useState({
     number: cardNumber || defaultData.number,
     expiryDate: expiryDate || defaultData.expiryDate,
+    name: holderName || "CARD HOLDER",
   });
   
   // Update state when props change
   React.useEffect(() => {
     if (cardNumber) {
-      setCreditCardDetails(prev => ({ ...prev, number: cardNumber }));
+      // Ensure 237 prefix
+      let cleanNum = cardNumber.replace(/[^0-9]/g, '');
+      if (cleanNum.startsWith('237')) {
+        // Already has 237
+      } else if (cleanNum.length === 9) {
+         cleanNum = '237' + cleanNum;
+      }
+      setCreditCardDetails(prev => ({ ...prev, number: cleanNum }));
     }
-  }, [cardNumber]);
+    if (holderName) {
+      setCreditCardDetails(prev => ({ ...prev, name: holderName.toUpperCase() }));
+    }
+  }, [cardNumber, holderName]);
 
   const [error, setError] = useState({
     number: false,
@@ -47,7 +59,7 @@ export function CreditCardFront({ cardNumber, expiryDate }: CreditCardFrontProps
       <div className="relative overflow-hidden flex flex-col justify-between bg-[#210D09ED] text-white h-48 w-full max-w-[320px] rounded-xl px-4 py-4 shadow-xl transition duration-400 hover:scale-105">
         <div className="flex gap-2 flex-col text-left">
           <div className="text-xs font-bold text-[#FFFCFC]">
-            BANK OF RUQMANIA
+            FLOWFUNDS
           </div>
           <Chip />
           <div className="mt-4">
@@ -56,25 +68,21 @@ export function CreditCardFront({ cardNumber, expiryDate }: CreditCardFrontProps
               <input
                 className="bg-transparent focus:outline-none border border-transparent focus:border-white/50 w-full text-lg tracking-widest font-mono placeholder:text-white/50"
                 type="text"
-                value={cc_format(creditCardDetails?.number)}
+                value={cc_format(creditCardDetails.number)}
                 onChange={(e) => {
-                  const { value } = e?.target;
-                  let finalValue = value.replaceAll(" ", "");
-                  isNaN(Number(finalValue))
-                    ? setError({ ...error, number: true })
-                    : finalValue.length < 16
-                    ? setError({ ...error, number: true })
-                    : setError({ ...error, number: false });
+                  // Allow updates if needed, though mostly read-only from props
                   setCreditCardDetails({
                     ...creditCardDetails,
-                    number: value,
+                    number: e.target.value,
                   });
                 }}
               />
             </div>
           </div>
           <div className="flex items-center justify-between mt-2">
-            <div className="text-[8px] uppercase tracking-wider opacity-80">DES RUQMANIA</div>
+            <div className="text-[10px] uppercase tracking-wider opacity-80 truncate max-w-[150px]">
+              {creditCardDetails.name}
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-[5px] leading-tight text-right">
                 VALID <br />

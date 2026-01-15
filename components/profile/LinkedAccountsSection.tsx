@@ -1,17 +1,10 @@
 // components/profile/LinkedAccountsSection.tsx
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -20,59 +13,103 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Plus, Trash2, Star } from 'lucide-react';
+import { Plus, Trash2, Star, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import api from '@/lib/api';
+import { toast } from 'sonner';
+import { getCarrierFromNumber } from '@/lib/utils';
 
 interface LinkedAccount {
   id: string;
   type: 'momo' | 'om';
-  phoneNumber: string;
+  phoneNumber: string; // From backend 'number'
   isPrimary: boolean;
-  label?: string;
+  label?: string; // From backend 'name'
 }
 
 export function LinkedAccountsSection() {
-  const [accounts, setAccounts] = useState<LinkedAccount[]>([
-    {
-      id: '1',
-      type: 'momo',
-      phoneNumber: '+237 6 XX XX XX XX',
-      isPrimary: true,
-      label: 'Personal',
-    },
-  ]);
+  const [accounts, setAccounts] = useState<LinkedAccount[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newAccount, setNewAccount] = useState({
-    type: 'momo' as 'momo' | 'om',
     phoneNumber: '',
     label: '',
   });
 
-  const handleAddAccount = () => {
-    const account: LinkedAccount = {
-      id: Date.now().toString(),
-      type: newAccount.type,
-      phoneNumber: newAccount.phoneNumber,
-      isPrimary: accounts.length === 0,
-      label: newAccount.label,
-    };
-    setAccounts([...accounts, account]);
-    setNewAccount({ type: 'momo', phoneNumber: '', label: '' });
-    setIsDialogOpen(false);
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
+
+  const fetchAccounts = async () => {
+    try {
+      const response = await api.getAccounts();
+      // Map backend response to local interface
+      // Assuming backend returns list of { id, name, number, type, ... }
+      const mappedAccounts = response.data.map((acc: any) => ({
+        id: acc.id,
+        type: acc.type,
+        phoneNumber: acc.number,
+        isPrimary: false, // Backend doesn't strictly have isPrimary flag yet, we can infer or leave false unless it matches profile phone logic
+        label: acc.name,
+      }));
+      setAccounts(mappedAccounts);
+      setLoading(false);
+    } catch (error) {
+      console.error('Failed to fetch accounts:', error);
+      toast.error('Failed to load linked accounts');
+      setLoading(false);
+    }
   };
 
-  const handleRemoveAccount = (id: string) => {
-    setAccounts(accounts.filter((acc) => acc.id !== id));
+  const handleAddAccount = async () => {
+    const carrier = getCarrierFromNumber(newAccount.phoneNumber);
+    if (!carrier) {
+      toast.error('Invalid Cameroon phone number or unsupported carrier');
+      return;
+    }
+
+    try {
+      // Assuming backend create endpoint: POST /accounts/
+      // Requires: name, number, type, initial_balance
+      const payload = {
+        name: newAccount.label || (carrier === 'momo' ? 'MoMo Account' : 'Orange Money Account'),
+        number: newAccount.phoneNumber,
+        type: carrier,
+        initial_balance: 0, // Default 0 as per requirement inference
+      };
+
+      await api.post('/accounts/', payload);
+      toast.success('Account added successfully');
+      setNewAccount({ phoneNumber: '', label: '' });
+      setIsDialogOpen(false);
+      fetchAccounts(); // Refresh list
+    } catch (error) {
+      console.error('Failed to add account:', error);
+      toast.error('Failed to add account');
+    }
   };
 
-  const handleSetPrimary = (id: string) => {
-    setAccounts(
-      accounts.map((acc) => ({
-        ...acc,
-        isPrimary: acc.id === id,
-      }))
+  const handleRemoveAccount = async (id: string) => {
+    try {
+      // Assuming backend delete endpoint: DELETE /accounts/<id>/
+      await api.delete(`/accounts/${id}/`);
+      toast.success('Account removed successfully');
+      fetchAccounts();
+    } catch (error) {
+      console.error('Failed to remove account:', error);
+      toast.error('Failed to remove account');
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        </div>
+      </Card>
     );
-  };
+  }
 
   return (
     <Card className="p-6">
@@ -94,47 +131,15 @@ export function LinkedAccountsSection() {
             <DialogHeader>
               <DialogTitle>Add Payment Account</DialogTitle>
               <DialogDescription>
-                Link a new MoMo or Orange Money account
+                Enter the phone number to automatically detect carrier
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="account-type">Account Type</Label>
-                <Select
-                  value={newAccount.type}
-                  onValueChange={(value: 'momo' | 'om') =>
-                    setNewAccount({ ...newAccount, type: value })
-                  }
-                >
-                  <SelectTrigger className="h-12">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="momo">
-                      <div className="flex items-center gap-3">
-                        <div className="h-6 w-6 relative">
-                          <Image src="/momo_logo.png" alt="MoMo" fill className="object-contain" />
-                        </div>
-                        <span>MTN Mobile Money</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="om">
-                      <div className="flex items-center gap-3">
-                        <div className="h-6 w-6 relative">
-                          <Image src="/om_logo.png" alt="Orange Money" fill className="object-contain" />
-                        </div>
-                        <span>Orange Money</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="phone-number">Phone Number</Label>
                 <Input
                   id="phone-number"
-                  placeholder="+237 6XX XX XX XX"
+                  placeholder="237 6XX XX XX XX"
                   value={newAccount.phoneNumber}
                   onChange={(e) =>
                     setNewAccount({ ...newAccount, phoneNumber: e.target.value })
@@ -187,24 +192,20 @@ export function LinkedAccountsSection() {
             >
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 relative">
-                  <Image
-                    src={account.type === 'momo' ? '/momo_logo.png' : '/om_logo.png'}
-                    alt={account.type === 'momo' ? 'MoMo' : 'Orange Money'}
-                    fill
-                    className="object-contain"
-                  />
+                  {(account.type === 'momo' || account.type === 'om') && (
+                     <Image
+                     src={account.type === 'momo' ? '/momo_logo.png' : '/om_logo.png'}
+                     alt={account.type === 'momo' ? 'MoMo' : 'Orange Money'}
+                     fill
+                     className="object-contain"
+                   />
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-gray-900">
-                      {account.type === 'momo' ? 'MTN Mobile Money' : 'Orange Money'}
+                      {account.type === 'momo' ? 'MTN Mobile Money' : account.type === 'om' ? 'Orange Money' : account.type}
                     </p>
-                    {account.isPrimary && (
-                      <span className="flex items-center gap-1 text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">
-                        <Star className="h-3 w-3 fill-current" />
-                        Primary
-                      </span>
-                    )}
                   </div>
                   <p className="text-sm text-gray-600">{account.phoneNumber}</p>
                   {account.label && (
@@ -213,22 +214,11 @@ export function LinkedAccountsSection() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {!account.isPrimary && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleSetPrimary(account.id)}
-                    className="text-emerald-600 hover:text-emerald-700"
-                  >
-                    Set Primary
-                  </Button>
-                )}
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => handleRemoveAccount(account.id)}
                   className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
-                  disabled={account.isPrimary && accounts.length === 1}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

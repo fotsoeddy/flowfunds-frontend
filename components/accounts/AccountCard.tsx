@@ -5,28 +5,31 @@ import { AccountType } from '@/types/transaction';
 import Image from 'next/image';
 
 interface AccountCardProps {
-  id: AccountType;
+  id: string;
   name: string;
   balance: number;
   icon: LucideIcon;
   isActive?: boolean;
+  type?: string;
 }
 
-export function AccountCard({ id, name, balance, icon: Icon, isActive = true }: AccountCardProps) {
+export function AccountCard({ id, name, balance, icon: Icon, isActive = true, type }: AccountCardProps) {
+  const accountType = type || id; // Fallback to id if type not provided (legacy)
+
   return (
     <Card className={`p-4 ${isActive ? '' : 'opacity-75'}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="bg-gray-100 rounded-lg p-3 relative">
-            {id === 'cash' ? (
+            {accountType === 'cash' ? (
               <div className="h-6 w-6 relative">
                 <Image src="/cash.png" alt="Cash" fill className="object-contain" />
               </div>
-            ) : id === 'momo' ? (
+            ) : accountType === 'momo' ? (
               <div className="h-6 w-6 relative">
                 <Image src="/momo_logo.png" alt="MoMo" fill className="object-contain" />
               </div>
-            ) : id === 'om' ? (
+            ) : accountType === 'om' ? (
               <div className="h-6 w-6 relative">
                 <Image src="/om_logo.png" alt="Orange Money" fill className="object-contain" />
               </div>

@@ -24,6 +24,7 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [userPhone, setUserPhone] = useState("");
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -50,6 +51,7 @@ export default function AccountsPage() {
       ]);
       setAccounts(accountsRes.data);
       setUserPhone(profileRes.data.phone_number);
+      setUserName(`${profileRes.data.first_name} ${profileRes.data.last_name}`);
       setLoading(false);
     } catch (error) {
       console.error('Failed to fetch data:', error);
@@ -125,7 +127,7 @@ export default function AccountsPage() {
       {/* Credit Card Section */}
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">My Card</h2>
-        <CreditCardFront cardNumber={userPhone} />
+        <CreditCardFront cardNumber={userPhone} holderName={userName} />
       </div>
 
       <div className="rounded-lg bg-gray-50 p-4 mb-6">
