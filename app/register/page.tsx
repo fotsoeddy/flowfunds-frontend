@@ -42,7 +42,7 @@ export default function RegisterPage() {
       await api.post("/auth/register/", {
         phone_number: formData.phone_number,
         first_name: formData.first_name,
-        initial_amount: formData.initial_amount,
+        initial_amount: Number(formData.initial_amount),
         password: formData.password,
       });
       
@@ -127,7 +127,6 @@ export default function RegisterPage() {
                   placeholder="50000" 
                   type="number" 
                   min="0"
-                  step="0.01"
                   className="pl-10"
                   value={formData.initial_amount}
                   onChange={handleChange}
