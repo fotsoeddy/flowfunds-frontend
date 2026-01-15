@@ -7,7 +7,7 @@ import axios, {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
-const api: AxiosInstance = axios.create({
+const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
@@ -15,7 +15,7 @@ const api: AxiosInstance = axios.create({
 });
 
 // Request interceptor to add token
-api.interceptors.request.use(
+axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
       const token = sessionStorage.getItem("access_token");
@@ -30,12 +30,20 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle errors (optional for now)
-api.interceptors.response.use(
+// Response interceptor to handle errors
+axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError) => {
     return Promise.reject(error);
   }
 );
+
+// Define auth methods and attach to the instance
+const api = axiosInstance as any;
+
+api.login = (data: any) => axiosInstance.post("/auth/login/", data);
+api.register = (data: any) => axiosInstance.post("/auth/register/", data);
+api.getProfile = () => axiosInstance.get("/auth/me/");
+api.getAccounts = () => axiosInstance.get("/accounts/");
 
 export default api;

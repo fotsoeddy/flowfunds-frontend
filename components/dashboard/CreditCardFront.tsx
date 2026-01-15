@@ -6,8 +6,24 @@ const defaultData = {
   expiryDate: "06/29",
 };
 
-export function CreditCardFront() {
-  const [creditCardDetails, setCreditCardDetails] = useState(defaultData);
+interface CreditCardFrontProps {
+  cardNumber?: string;
+  expiryDate?: string;
+}
+
+export function CreditCardFront({ cardNumber, expiryDate }: CreditCardFrontProps) {
+  const [creditCardDetails, setCreditCardDetails] = useState({
+    number: cardNumber || defaultData.number,
+    expiryDate: expiryDate || defaultData.expiryDate,
+  });
+  
+  // Update state when props change
+  React.useEffect(() => {
+    if (cardNumber) {
+      setCreditCardDetails(prev => ({ ...prev, number: cardNumber }));
+    }
+  }, [cardNumber]);
+
   const [error, setError] = useState({
     number: false,
     expiryDate: false,
