@@ -11,9 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Loader2, PiggyBank } from 'lucide-react'; // Added PiggyBank for Save banner
+import { ArrowLeft, Loader2, PiggyBank } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -24,7 +25,6 @@ export function TransactionForm() {
   const [formData, setFormData] = useState({
     type: 'expense',
     amount: '',
-    category: '',
     reason: '',
     accountId: '',
     date: new Date().toISOString().split('T')[0],
@@ -36,7 +36,6 @@ export function TransactionForm() {
         const response = await api.getAccounts();
         setAccounts(response.data);
         if (response.data.length > 0) {
-            // Default to first account
             setFormData(prev => ({ ...prev, accountId: response.data[0].id }));
         }
       } catch (error) {
@@ -55,7 +54,7 @@ export function TransactionForm() {
       const payload = {
           type: formData.type,
           amount: Number(formData.amount),
-          category: formData.category,
+          category: '', // clear category
           reason: formData.reason,
           account_id: formData.accountId,
           date: new Date(formData.date).toISOString(),
@@ -78,6 +77,38 @@ export function TransactionForm() {
       setLoading(false);
     }
   };
+
+  const getAccountImage = (type: string) => {
+    switch (type) {
+      case 'momo':
+        return '/momo_logo.png';
+      case 'om':
+        return '/om_logo.png';
+      default:
+        return '/cash.png'; // cash.png exists
+    }
+  };
+
+  const getSelectValue = () => {
+    if (!formData.accountId) return null;
+    const account = accounts.find(a => a.id.toString() === formData.accountId.toString());
+    if (!account) return null;
+
+    return (
+       <div className="flex items-center gap-2">
+            <div className="relative h-6 w-6 overflow-hidden rounded-full">
+                <Image
+                    src={getAccountImage(account.type)}
+                    alt={account.type}
+                    fill
+                    className="object-cover"
+                />
+            </div>
+            <span>{account.name} - {account.balance.toLocaleString()} {account.currency}</span>
+       </div>
+    );
+  };
+
 
   return (
     <div className="p-4 max-w-lg mx-auto">
@@ -129,12 +160,24 @@ export function TransactionForm() {
               onValueChange={(value) => setFormData({ ...formData, accountId: value })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select account" />
+                <SelectValue placeholder="Select account">
+                     {getSelectValue()}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {accounts.map((account) => (
                   <SelectItem key={account.id} value={account.id}>
-                    {account.name} ({account.type}) - {account.balance.toLocaleString()} {account.currency}
+                    <div className="flex items-center gap-2">
+                        <div className="relative h-6 w-6 overflow-hidden rounded-full">
+                            <Image 
+                                src={getAccountImage(account.type)} 
+                                alt={account.type}
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
+                        <span>{account.name} ({account.type}) - {account.balance.toLocaleString()} {account.currency}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -151,17 +194,6 @@ export function TransactionForm() {
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
               required
               min="1"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
-            <Input
-              id="category"
-              placeholder="e.g., Food, Transport, Salary"
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              required={formData.type === 'expense'} 
             />
           </div>
 

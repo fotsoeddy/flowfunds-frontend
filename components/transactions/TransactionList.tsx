@@ -61,8 +61,7 @@ export function TransactionList() {
     if (search) {
       const searchLower = search.toLowerCase();
       const reasonsMatch = transaction.reason?.toLowerCase().includes(searchLower);
-      const categoryMatch = transaction.category?.toLowerCase().includes(searchLower);
-      if (!reasonsMatch && !categoryMatch) return false;
+      if (!reasonsMatch) return false;
     }
 
     if (monthFilter !== 'all') {
@@ -98,26 +97,11 @@ export function TransactionList() {
     }
   };
 
-  const formatAccount = (acc: any) => {
-      // Handle cases where account might be an object or string
-      if (typeof acc === 'string') {
-          const names: Record<string, string> = {
-            cash: 'Cash',
-            momo: 'MoMo',
-            om: 'Orange Money',
-          };
-          return names[acc] || acc;
-      }
-      return acc?.name || 'Account';
-  };
+
 
   if (loading) {
      return <div className="text-center py-10">Loading transactions...</div>;
   }
-
-  // Calculate total balance of filtered transactions or just use a placeholder logic
-  // Real app might want cumulative balance, but here maybe just sum the visible ones?
-  // Let's stick to simple display as per user request.
 
   return (
     <div className="space-y-4">
@@ -127,7 +111,7 @@ export function TransactionList() {
             <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input 
-                placeholder="Search transactions..." 
+                placeholder="Search by reason..." 
                 className="pl-9 bg-white"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -183,14 +167,11 @@ export function TransactionList() {
                       {getIcon(transaction.type)}
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">{transaction.reason || transaction.category || 'Transaction'}</p>
+                      <p className="font-semibold text-gray-900">{transaction.account_name || 'Account'}</p>
                       <div className="flex items-center gap-2 mt-1">
                          <span className="text-xs font-medium px-2 py-1 rounded bg-gray-100 text-gray-600">
-                           {formatAccount(transaction.account)}
+                           {transaction.reason}
                          </span>
-                         {transaction.category && (
-                           <span className="text-xs text-gray-500">• {transaction.category}</span>
-                         )}
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
                         {new Date(transaction.date).toLocaleDateString()}
