@@ -1,16 +1,29 @@
 // components/layout/Header.tsx
 'use client';
+import { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
+import api from '@/lib/api';
 
 export function Header() {
-  // Mock user data - in real app, this would come from auth context
-  const user = {
-    name: 'Eddy Fotso',
-    profileImage: '/profile-placeholder.png', // You can replace with actual user image
-  };
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+        if (typeof window !== 'undefined' && sessionStorage.getItem('access_token')) {
+            try {
+                const response = await api.getProfile();
+                setUser(response.data);
+            } catch (error) {
+                console.error("Failed to load user in header", error);
+            }
+        }
+    };
+    fetchUser();
+  }, []);
+
+  const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'User';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white">
@@ -27,7 +40,7 @@ export function Header() {
         <Link href="/profile">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
             <div className="flex flex-col items-end">
-              <span className="text-sm font-semibold text-gray-900">{user.name}</span>
+              <span className="text-sm font-semibold text-gray-900">{displayName}</span>
               <span className="text-xs text-gray-500">View Profile</span>
             </div>
             <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-emerald-600 bg-gray-100">
