@@ -11,9 +11,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import Image from "next/image";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function LoginPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [phone_number, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -29,6 +31,9 @@ export default function LoginPage() {
       // Store tokens in sessionStorage as requested
       sessionStorage.setItem("access_token", response.data.access);
       sessionStorage.setItem("refresh_token", response.data.refresh);
+
+      // Invalidate queries to ensure fresh data for the new user
+      queryClient.invalidateQueries();
       
       toast.success("Logged in successfully!");
       router.push("/");

@@ -1,27 +1,12 @@
 // components/layout/Header.tsx
 'use client';
-import { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import api from '@/lib/api';
+import { useAuth } from '@/hooks/use-auth';
 
 export function Header() {
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-        if (typeof window !== 'undefined' && sessionStorage.getItem('access_token')) {
-            try {
-                const response = await api.getProfile();
-                setUser(response.data);
-            } catch (error) {
-                console.error("Failed to load user in header", error);
-            }
-        }
-    };
-    fetchUser();
-  }, []);
+  const { data: user } = useAuth();
 
   const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'User';
 

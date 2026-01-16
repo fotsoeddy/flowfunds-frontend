@@ -8,6 +8,8 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/use-auth';
+import { useAccounts } from '@/hooks/use-accounts';
 
 // Define the Account interface matching backend response
 interface Account {
@@ -21,10 +23,14 @@ interface Account {
 export default function AccountsPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [userPhone, setUserPhone] = useState("");
-  const [userName, setUserName] = useState("");
+  const { data: user, isLoading: isUserLoading } = useAuth();
+  const { data: accountsData, isLoading: isAccountsLoading } = useAccounts();
+  
+  const accounts = accountsData || [];
+  const loading = isUserLoading || isAccountsLoading; // Initial load
+
+  const userPhone = user?.phone_number || "";
+  const userName = user ? `${user.first_name} ${user.last_name}` : "";
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -36,29 +42,6 @@ export default function AccountsPage() {
       }
     }
   }, [router]);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchData();
-    }
-  }, [isAuthenticated]);
-
-  const fetchData = async () => {
-    try {
-      const [accountsRes, profileRes] = await Promise.all([
-        api.getAccounts(),
-        api.getProfile()
-      ]);
-      setAccounts(accountsRes.data);
-      setUserPhone(profileRes.data.phone_number);
-      setUserName(`${profileRes.data.first_name} ${profileRes.data.last_name}`);
-      setLoading(false);
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-      toast.error('Failed to load data');
-      setLoading(false);
-    }
-  };
 
   const handleLogout = () => {
     sessionStorage.clear();

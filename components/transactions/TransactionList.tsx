@@ -1,7 +1,6 @@
 // components/transactions/TransactionList.tsx
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { ArrowUpRight, ArrowDownLeft, PiggyBank, Search, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -11,31 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import api from '@/lib/api';
-import { toast } from 'sonner';
+import { useTransactions } from '@/hooks/use-transactions';
 
 export function TransactionList() {
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: transactionsData, isLoading: loading } = useTransactions();
+  const transactions = transactionsData || [];
+  
   const [filter, setFilter] = useState<'all' | 'income' | 'expense' | 'save'>('all');
   const [search, setSearch] = useState('');
   const [monthFilter, setMonthFilter] = useState<string>('all');
-
-  useEffect(() => {
-    fetchTransactions();
-  }, []);
-
-  const fetchTransactions = async () => {
-    try {
-      const response = await api.getTransactions();
-      setTransactions(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Failed to fetch transactions', error);
-      toast.error('Failed to load transactions');
-      setLoading(false);
-    }
-  };
 
   const getAvailableMonths = () => {
     // If no transactions, return empty
