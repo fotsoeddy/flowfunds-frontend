@@ -112,31 +112,50 @@ export default function AccountsPage() {
 
   // Process data for the graph
   const graphData = useMemo(() => {
-    const dataMap = new Map<string, { date: string, income: number, expense: number }>();
+    if (!user?.created) return [];
 
+    const dataMap = new Map<string, { date: string, income: number, expense: number, rawDate: Date }>();
+    const today = new Date();
+    const startDate = new Date(user.created);
+    
+    // Normalize dates to midnight
+    today.setHours(0, 0, 0, 0);
+    startDate.setHours(0, 0, 0, 0);
+
+    // Initialize map with all dates from joined date to today
+    const currentDate = new Date(startDate);
+    while (currentDate <= today) {
+        const dateArr = currentDate.toDateString().split(' ');
+        const dateKey = `${dateArr[1]} ${dateArr[2]}`; // "Jan 01"
+        // Key needs to be unique if spanning years, but for visual simplicity let's stick to this or include year if needed. 
+        // Better: use ISO string YYYY-MM-DD as map key, but display formatted date.
+        const isoKey = currentDate.toISOString().split('T')[0];
+        
+        dataMap.set(isoKey, { 
+            date: dateKey, 
+            income: 0, 
+            expense: 0,
+            rawDate: new Date(currentDate) 
+        });
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Fill with actual transaction data
     transactions.forEach(t => {
-       const dateArr = new Date(t.date).toDateString().split(' ');
-       // Format: "Mon Jan 01" -> "Jan 01"
-       const dateKey = `${dateArr[1]} ${dateArr[2]}`; 
-       
-       if (!dataMap.has(dateKey)) {
-           dataMap.set(dateKey, { date: dateKey, income: 0, expense: 0 });
-       }
-       
-       const entry = dataMap.get(dateKey)!;
-       const amount = Number(t.amount);
+       const tDate = new Date(t.date);
+       tDate.setHours(0, 0, 0, 0);
+       const isoKey = tDate.toISOString().split('T')[0];
 
-       if (t.type === 'income') {
-           entry.income += amount;
-       } else if (t.type === 'expense') {
-           entry.expense += amount;
+       if (dataMap.has(isoKey)) {
+           const entry = dataMap.get(isoKey)!;
+           const amount = Number(t.amount);
+           if (t.type === 'income') entry.income += amount;
+           else if (t.type === 'expense') entry.expense += amount;
        }
     });
 
-    // Convert map to array and sort by date (simple sort for now, assuming recent dates)
-    // For a robust sort we might need the original timestamp
-    return Array.from(dataMap.values()).reverse(); // API returns most recent first, so reverse for graph
-  }, [transactions]);
+    return Array.from(dataMap.values());
+  }, [transactions, user]);
 
 
   if (!isAuthenticated) return null;
@@ -185,46 +204,53 @@ export default function AccountsPage() {
       {/* Graph Section */}
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Daily Income vs Expense</h2>
-        <div className="h-64 w-full bg-white rounded-lg border border-gray-100 p-2 shadow-sm">
+        <div className="bg-white rounded-lg border border-gray-100 p-2 shadow-sm relative">
             {isTransactionsLoading ? (
-                <div className="h-full flex items-center justify-center text-gray-400">Loading graph...</div>
+                <div className="h-64 flex items-center justify-center text-gray-400">Loading graph...</div>
             ) : graphData.length === 0 ? (
-                <div className="h-full flex items-center justify-center text-gray-400">No data available</div>
+                <div className="h-64 flex items-center justify-center text-gray-400">No data available</div>
             ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={graphData}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                        <XAxis 
-                            dataKey="date" 
-                            axisLine={false} 
-                            tickLine={false} 
-                            tick={{ fill: '#6B7280', fontSize: 12 }}
-                            dy={10}
-                        />
-                        <YAxis 
-                            hide={true} 
-                        />
-                        <Tooltip 
-                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                            cursor={{ fill: '#F3F4F6' }}
-                        />
-                        <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }}/>
-                        <Bar 
-                            name="Income"
-                            dataKey="income" 
-                            fill="#10B981" 
-                            radius={[4, 4, 0, 0]} 
-                            barSize={20}
-                        />
-                        <Bar 
-                            name="Expense"
-                            dataKey="expense" 
-                            fill="#EF4444" 
-                            radius={[4, 4, 0, 0]} 
-                            barSize={20}
-                        />
-                    </BarChart>
-                </ResponsiveContainer>
+                <div className="w-full overflow-x-auto pb-2 custom-scrollbar">
+                    {/* Width depends on number of days to ensure readability. Minimum 100% */}
+                    <div style={{ minWidth: `${Math.max(100, graphData.length * 50)}px`, height: '256px' }}> 
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={graphData} barGap={0} barCategoryGap="20%">
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                <XAxis 
+                                    dataKey="date" 
+                                    axisLine={false} 
+                                    tickLine={false} 
+                                    tick={{ fill: '#6B7280', fontSize: 12 }}
+                                    dy={10}
+                                    interval={0} // Show all ticks if space permits, or let recharts handle it. 
+                                    // If too many, we rely on minWidth to make them spaced out.
+                                />
+                                <YAxis 
+                                    hide={true} 
+                                />
+                                <Tooltip 
+                                    cursor={{ fill: '#F3F4F6' }}
+                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                />
+                                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }}/>
+                                <Bar 
+                                    name="Income"
+                                    dataKey="income" 
+                                    fill="#10B981" 
+                                    radius={[4, 4, 0, 0]} 
+                                    barSize={20}
+                                />
+                                <Bar 
+                                    name="Expense"
+                                    dataKey="expense" 
+                                    fill="#EF4444" 
+                                    radius={[4, 4, 0, 0]} 
+                                    barSize={20}
+                                />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
             )}
         </div>
       </div>

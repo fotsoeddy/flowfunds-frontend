@@ -6,6 +6,7 @@ import { PlusCircle, Loader2 } from 'lucide-react';
 import { BalanceCard } from '@/components/dashboard/BalanceCard';
 import { TotalBalance } from '@/components/dashboard/TotalBalance';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
+import { WalletStack } from '@/components/dashboard/WalletStack'; // New import
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
@@ -81,10 +82,8 @@ export default function DashboardPage() {
         <p className="text-gray-600">Track your finances in real-time</p>
       </div>
 
-      <div className="grid gap-4 mb-8">
-        {processedAccounts.map((account) => (
-          <BalanceCard key={account.id} {...account} />
-        ))}
+      <div className="mb-8">
+        <WalletStack accounts={processedAccounts} />
       </div>
 
       <TotalBalance total={totalUsable} />
