@@ -210,20 +210,20 @@ export default function AccountsPage() {
             ) : graphData.length === 0 ? (
                 <div className="h-64 flex items-center justify-center text-gray-400">No data available</div>
             ) : (
-                <div className="w-full overflow-x-auto pb-2" style={{ scrollbarWidth: 'thin' }}>
-                    {/* Fixed width per day (80px) to ensure bars are readable. Container shows ~7 days at once */}
-                    <div style={{ width: `${graphData.length * 80}px`, height: '280px', minWidth: '100%' }}> 
+                <div className="w-full overflow-x-auto pb-2 custom-scrollbar">
+                    {/* Width depends on number of days to ensure readability. Minimum 100% */}
+                    <div style={{ minWidth: `${Math.max(100, graphData.length * 50)}px`, height: '256px' }}> 
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={graphData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+                            <BarChart data={graphData} barGap={0} barCategoryGap="20%">
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                                 <XAxis 
                                     dataKey="date" 
                                     axisLine={false} 
                                     tickLine={false} 
-                                    tick={{ fill: '#6B7280', fontSize: 11 }}
-                                    angle={-45}
-                                    textAnchor="end"
-                                    height={60}
+                                    tick={{ fill: '#6B7280', fontSize: 12 }}
+                                    dy={10}
+                                    interval={0} // Show all ticks if space permits, or let recharts handle it. 
+                                    // If too many, we rely on minWidth to make them spaced out.
                                 />
                                 <YAxis 
                                     hide={true} 
@@ -232,20 +232,20 @@ export default function AccountsPage() {
                                     cursor={{ fill: '#F3F4F6' }}
                                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                 />
-                                <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }}/>
+                                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }}/>
                                 <Bar 
                                     name="Income"
                                     dataKey="income" 
                                     fill="#10B981" 
                                     radius={[4, 4, 0, 0]} 
-                                    maxBarSize={40}
+                                    barSize={20}
                                 />
                                 <Bar 
                                     name="Expense"
                                     dataKey="expense" 
                                     fill="#EF4444" 
                                     radius={[4, 4, 0, 0]} 
-                                    maxBarSize={40}
+                                    barSize={20}
                                 />
                             </BarChart>
                         </ResponsiveContainer>
