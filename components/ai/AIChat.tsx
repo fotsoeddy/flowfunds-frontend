@@ -93,21 +93,26 @@ export function AIChat() {
   return (
     <>
       {/* Floating Chat Button - Adjusted position to avoid navigation */}
-      <motion.button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-32 right-4 h-16 w-16 rounded-full bg-emerald-600 hover:bg-emerald-700 shadow-xl flex items-center justify-center text-white z-40 overflow-hidden"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        style={{ boxShadow: '0 10px 40px rgba(16, 185, 129, 0.3)' }}
-      >
-        <Image 
-          src="/ai_assistant.png" 
-          alt="AI Assistant" 
-          width={64} 
-          height={64}
-          className="object-cover"
-        />
-      </motion.button>
+      <div className="fixed bottom-24 right-4 z-40 flex flex-col items-center gap-1">
+        <motion.button
+          onClick={() => setIsOpen(true)}
+          className="h-12 w-12 rounded-full bg-emerald-600 hover:bg-emerald-700 shadow-lg flex items-center justify-center text-white overflow-hidden"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          style={{ boxShadow: '0 8px 25px rgba(16, 185, 129, 0.25)' }}
+        >
+          <Image 
+            src="/ai_assistant.png" 
+            alt="AI Assistant" 
+            width={48} 
+            height={48}
+            className="object-cover"
+          />
+        </motion.button>
+        <span className="text-[10px] font-medium text-emerald-700 bg-white/90 px-2 py-0.5 rounded-full shadow-sm">
+          AI Chat
+        </span>
+      </div>
 
       {/* Chat Modal */}
       <AnimatePresence>
