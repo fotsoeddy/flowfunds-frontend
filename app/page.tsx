@@ -6,7 +6,8 @@ import { PlusCircle, Loader2 } from 'lucide-react';
 import { BalanceCard } from '@/components/dashboard/BalanceCard';
 import { TotalBalance } from '@/components/dashboard/TotalBalance';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
-import { WalletStack } from '@/components/dashboard/WalletStack'; // New import
+import { WalletStack } from '@/components/dashboard/WalletStack';
+import { AIChat } from '@/components/ai/AIChat';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
@@ -100,11 +101,7 @@ export default function DashboardPage() {
         <RecentTransactions transactions={transactions} />
       </div>
 
-      <Link href="/add">
-        <Button className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg bg-emerald-600 hover:bg-emerald-700">
-          <PlusCircle className="h-6 w-6" />
-        </Button>
-      </Link>
+      <AIChat />
     </div>
   );
 }
