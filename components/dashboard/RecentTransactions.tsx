@@ -86,7 +86,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                 </div>
                 <div className="text-right">
                   <p className={`font-bold ${config.color}`}>
-                    {config.prefix}${Number(transaction.amount).toLocaleString()}
+                    {config.prefix} {Number(transaction.amount).toLocaleString()} XAF
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     {formatDate(transaction.date)}

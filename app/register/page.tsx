@@ -32,6 +32,20 @@ export default function RegisterPage() {
     e.preventDefault();
     setIsLoading(true);
 
+    // Password Validation
+    if (formData.password.length < 8) {
+      toast.error("Password must be at least 8 characters long");
+      setIsLoading(false);
+      return;
+    }
+    const hasLetter = /[a-zA-Z]/.test(formData.password);
+    const hasNumber = /[0-9]/.test(formData.password);
+    if (!hasLetter || !hasNumber) {
+      toast.error("Password must contain at least one letter and one number");
+      setIsLoading(false);
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords do not match");
       setIsLoading(false);
@@ -51,15 +65,35 @@ export default function RegisterPage() {
       router.push("/login");
     } catch (err: any) {
       console.error("Registration error:", err);
-      // Handle array of errors or simple message
-      const detail = err.response?.data;
-      let message = "Failed to register.";
       
-      if (typeof detail === 'object') {
-        // Simple way to format object errors
-        message = Object.entries(detail).map(([key, val]) => `${key}: ${val}`).join(", ");
-      } else if (typeof detail === 'string') {
-        message = detail;
+      let message = "Failed to register. Please try again.";
+      const responseData = err.response?.data;
+      console.log("Debug - Registration Error Response:", responseData);
+
+      if (responseData) {
+        if (typeof responseData === 'object' && !Array.isArray(responseData)) {
+            // Handle DRF standard error format: { field: [errors], ... }
+            const errorMessages = Object.entries(responseData).map(([key, val]) => {
+                const fieldName = key.replace('_', ' '); // "phone_number" -> "phone number"
+                const errorText = Array.isArray(val) ? val.join(" ") : String(val);
+                // Capitalize first letter
+                const capitalizedField = fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
+                return `${capitalizedField}: ${errorText}`;
+            });
+            message = errorMessages.join("\n");
+        } else if (typeof responseData === 'string') {
+            // Check if it's HTML (likely a 404/500/400 generic page)
+            if (responseData.trim().startsWith('<')) {
+                message = "Server verification failed. Please check your connection or contact support.";
+            } else {
+                message = responseData;
+            }
+        }
+      }
+      
+      // Prevent toast from being excessively long
+      if (message.length > 200) {
+          message = message.substring(0, 200) + "...";
       }
       
       toast.error(message);
