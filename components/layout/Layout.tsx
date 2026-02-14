@@ -4,8 +4,10 @@ import { Header } from './Header';
 import { Navigation } from './Navigation';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
+import { Toaster } from 'sonner';
+import { usePushNotifications } from '@/hooks/use-push-notifications';
 import api from '@/lib/api';
+import { useEffect } from 'react';
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -30,46 +32,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuthPage = pathname === '/login' || pathname === '/register';
 
+  /* 
+     Logic moved to usePushNotifications hook. 
+     We still want to trigger the initial check/auto-subscribe on mount (non-manual).
+  */
+  const { subscribeToNotifications } = usePushNotifications();
+
   useEffect(() => {
-    if ('serviceWorker' in navigator && !isAuthPage) {
-      const registerSW = async () => {
-        try {
-            const registration = await navigator.serviceWorker.register('/sw.js');
-            console.log('SW registered:', registration);
-
-            // Request permission
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-                if (!publicKey) {
-                    console.error('VAPID public key not found');
-                    return;
-                }
-
-                const convertedVapidKey = urlBase64ToUint8Array(publicKey);
-                let subscription = await registration.pushManager.getSubscription();
-
-                if (!subscription) {
-                    subscription = await registration.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: convertedVapidKey
-                    });
-                }
-                
-                // Send subscription to backend
-                const subJSON = subscription.toJSON();
-                await api.savePushSubscription({
-                    endpoint: subJSON.endpoint,
-                    p256dh: subJSON.keys?.p256dh,
-                    auth: subJSON.keys?.auth
-                });
-                console.log('Push notification subscribed!');
-            }
-        } catch (error) {
-            console.error('SW registration failed:', error);
-        }
-      };
-      registerSW();
+    if (!isAuthPage) {
+        subscribeToNotifications(false); // false = not manual, so it won't toast success but will toast denied limit
     }
   }, [isAuthPage]);
 
@@ -78,6 +49,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <Header />
       <main className={cn("flex-1 flex flex-col", !isAuthPage ? "pb-24" : "")}>{children}</main>
       <Navigation />
+      <Toaster />
     </div>
   );
 }

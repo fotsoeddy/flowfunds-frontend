@@ -3,6 +3,7 @@
 import { UserInfoSection } from '@/components/profile/UserInfoSection';
 import { LinkedAccountsSection } from '@/components/profile/LinkedAccountsSection';
 import { SecuritySection } from '@/components/profile/SecuritySection';
+import { NotificationSection } from '@/components/profile/NotificationSection';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -45,9 +46,10 @@ export default function ProfilePage() {
         {/* Sections */}
         <div className="space-y-6">
           <UserInfoSection />
+          <NotificationSection />
           <LinkedAccountsSection />
           <SecuritySection />
-        </div>
+      </div>
       </div>
     </div>
   );
