@@ -114,7 +114,7 @@ export function TransactionForm() {
 
 
   return (
-    <div className="p-4 max-w-lg mx-auto">
+    <div className="p-6 max-w-xl mx-auto space-y-8">
       <div className="flex items-center gap-4 mb-6">
         <Link href="/">
           <Button variant="ghost" size="icon">
@@ -128,7 +128,7 @@ export function TransactionForm() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label>Transaction Type</Label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 type="button"
                 variant={formData.type === 'expense' ? 'default' : 'outline'}
@@ -145,14 +145,14 @@ export function TransactionForm() {
               >
                 Income
               </Button>
-              <Button
+              {/* <Button
                 type="button"
                 variant={formData.type === 'save' ? 'default' : 'outline'}
                 className={formData.type === 'save' ? 'bg-blue-600 hover:bg-blue-700' : ''}
                 onClick={() => setFormData({ ...formData, type: 'save' })}
               >
                 Savings
-              </Button>
+              </Button> */}
             </div>
           </div>
 
