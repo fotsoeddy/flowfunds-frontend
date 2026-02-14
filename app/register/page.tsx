@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import Image from "next/image";
+import { LogoLoader } from "@/components/ui/logo-loader";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -205,7 +206,14 @@ export default function RegisterPage() {
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
               disabled={isLoading}
             >
-              {isLoading ? "Creating account..." : "Sign Up"}
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <LogoLoader size={20} className="brightness-0 invert" />
+                  <span>Creating account...</span>
+                </div>
+              ) : (
+                "Sign Up"
+              )}
               {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
             <div className="text-center text-sm">

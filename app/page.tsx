@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { PlusCircle, Loader2 } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
+import { LogoLoader } from '@/components/ui/logo-loader';
 import { BalanceCard } from '@/components/dashboard/BalanceCard';
 import { TotalBalance } from '@/components/dashboard/TotalBalance';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
@@ -51,7 +52,7 @@ export default function DashboardPage() {
   }, [router]);
 
   if (loading) {
-    return <div className="h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-emerald-600" /></div>;
+    return <div className="h-screen flex items-center justify-center"><LogoLoader size={60} /></div>;
   }
 
   // Helper to map account type to UI visuals

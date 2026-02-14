@@ -23,7 +23,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trash2, Star, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Star } from 'lucide-react';
+import { LogoLoader } from '@/components/ui/logo-loader';
 import Image from 'next/image';
 import api from '@/lib/api';
 import { toast } from 'sonner';
@@ -141,7 +142,7 @@ export function LinkedAccountsSection() {
     return (
       <Card className="p-6">
         <div className="flex justify-center py-4">
-          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+          <LogoLoader size={32} />
         </div>
       </Card>
     );

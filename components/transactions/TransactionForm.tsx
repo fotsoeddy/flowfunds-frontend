@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Loader2, PiggyBank } from 'lucide-react';
+import { ArrowLeft, PiggyBank } from 'lucide-react';
+import { LogoLoader } from '@/components/ui/logo-loader';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -241,7 +242,7 @@ export function TransactionForm() {
             className="w-full bg-emerald-600 hover:bg-emerald-700"
             disabled={loading || !formData.accountId}
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add Transaction'}
+            {loading ? <LogoLoader size={20} className="brightness-0 invert" /> : 'Add Transaction'}
           </Button>
         </form>
       </Card>

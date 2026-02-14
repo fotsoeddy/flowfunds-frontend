@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Loader2, MessageCircle } from 'lucide-react';
+import { X, Send, MessageCircle } from 'lucide-react';
+import { LogoLoader } from '@/components/ui/logo-loader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import api from '@/lib/api';
@@ -212,7 +213,7 @@ export function AIChat() {
                   >
                     <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm">
                       <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+                        <LogoLoader size={16} />
                         <span className="text-sm text-gray-600">Analyzing your finances...</span>
                       </div>
                     </div>

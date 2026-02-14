@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   description: 'Track your income, expenses, and savings effortlessly',
   manifest: '/manifest.json',
   icons: {
-    icon: '/icons/icon-192.png',
-    apple: '/icons/icon-192.png',
+    icon: '/logo/logo.svg',
+    apple: '/logo/logo.svg',
   },
   appleWebApp: {
     capable: true,

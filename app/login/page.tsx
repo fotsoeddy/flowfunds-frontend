@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import api from "@/lib/api";
 import Image from "next/image";
 import { useQueryClient } from "@tanstack/react-query";
+import { LogoLoader } from "@/components/ui/logo-loader";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -101,13 +102,20 @@ export default function LoginPage() {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
+          <CardFooter className="flex flex-col space-y-4 pt-4">
             <Button 
               type="submit" 
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <LogoLoader size={20} className="brightness-0 invert" />
+                  <span>Signing in...</span>
+                </div>
+              ) : (
+                "Sign In"
+              )}
               {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
             <div className="text-center text-sm">
