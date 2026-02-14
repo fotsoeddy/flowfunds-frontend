@@ -60,11 +60,13 @@ export default function DashboardPage() {
      switch(type) {
          case 'momo':
              return { bgColor: 'bg-yellow-100', imageSrc: '/momo_logo.png' };
-         case 'om':
-             return { bgColor: 'bg-orange-100', imageSrc: '/om_logo.png' };
-         default: // cash
-             return { bgColor: 'bg-emerald-100', imageSrc: '/cash.png' }; 
-     }
+          case 'om':
+              return { bgColor: 'bg-orange-100', imageSrc: '/om_logo.png' };
+          case 'savings':
+              return { bgColor: 'bg-blue-100', imageSrc: '/logo/logo.png' };
+          default: // cash
+              return { bgColor: 'bg-emerald-100', imageSrc: '/cash.png' }; 
+      }
   };
 
   const processedAccounts = accounts.map(acc => ({
@@ -73,7 +75,11 @@ export default function DashboardPage() {
       ...getAccountVisuals(acc.type)
   }));
 
-  const totalUsable = accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
+  const totalUsable = accounts
+    .filter(acc => acc.type !== 'savings')
+    .reduce((sum, acc) => sum + Number(acc.balance), 0);
+  
+  const netWorth = accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
 
   return (
     <div className="container px-4 py-6 pb-20">
@@ -88,7 +94,7 @@ export default function DashboardPage() {
         <WalletStack accounts={processedAccounts} />
       </div>
 
-      <TotalBalance total={totalUsable} />
+      <TotalBalance total={totalUsable} netWorth={netWorth} />
 
       <div className="mt-8">
         <div className="flex items-center justify-between mb-4">

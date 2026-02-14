@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import Image from "next/image";
+import { Loader2 } from "lucide-react";
 import { LogoLoader } from "@/components/ui/logo-loader";
 
 export default function RegisterPage() {
@@ -200,7 +201,7 @@ export default function RegisterPage() {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
+          <CardFooter className="flex flex-col gap-4 px-0 pt-4">
             <Button 
               type="submit" 
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -208,7 +209,7 @@ export default function RegisterPage() {
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
-                  <LogoLoader size={20} className="brightness-0 invert" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Creating account...</span>
                 </div>
               ) : (

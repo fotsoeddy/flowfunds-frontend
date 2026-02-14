@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, PiggyBank } from 'lucide-react';
+import { ArrowLeft, PiggyBank, Loader2 } from 'lucide-react';
 import { LogoLoader } from '@/components/ui/logo-loader';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -81,12 +81,14 @@ export function TransactionForm() {
 
   const getAccountImage = (type: string) => {
     switch (type) {
-      case 'momo':
+      case 'momo': // Put momo back just in case
         return '/momo_logo.png';
       case 'om':
         return '/om_logo.png';
+      case 'savings':
+        return '/logo/logo.png';
       default:
-        return '/cash.png'; // cash.png exists
+        return '/cash.png'; 
     }
   };
 
@@ -166,21 +168,33 @@ export function TransactionForm() {
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {accounts.map((account) => (
-                  <SelectItem key={account.id} value={account.id}>
-                    <div className="flex items-center gap-2">
-                        <div className="relative h-6 w-6 overflow-hidden rounded-full">
-                            <Image 
-                                src={getAccountImage(account.type)} 
-                                alt={account.type}
-                                fill
-                                className="object-cover"
-                            />
-                        </div>
-                        <span>{account.name} ({account.type}) - {account.balance.toLocaleString()} {account.currency}</span>
-                    </div>
-                  </SelectItem>
-                ))}
+                {accounts
+                  .filter(account => {
+                    if (formData.type === 'save') {
+                      // Cannot "save" from a savings account
+                      return account.type !== 'savings';
+                    }
+                    if (account.type === 'savings') {
+                      // Only show savings for income/expense if it has money
+                      return Number(account.balance) > 0;
+                    }
+                    return true;
+                  })
+                  .map((account) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      <div className="flex items-center gap-2">
+                          <div className="relative h-6 w-6 overflow-hidden rounded-full">
+                              <Image 
+                                  src={getAccountImage(account.type)} 
+                                  alt={account.type}
+                                  fill
+                                  className="object-cover"
+                              />
+                          </div>
+                          <span>{account.name} ({account.type}) - {account.balance.toLocaleString()} {account.currency}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
@@ -242,7 +256,7 @@ export function TransactionForm() {
             className="w-full bg-emerald-600 hover:bg-emerald-700"
             disabled={loading || !formData.accountId}
           >
-            {loading ? <LogoLoader size={20} className="brightness-0 invert" /> : 'Add Transaction'}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add Transaction'}
           </Button>
         </form>
       </Card>

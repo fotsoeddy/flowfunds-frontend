@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import api from "@/lib/api";
 import Image from "next/image";
 import { useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { LogoLoader } from "@/components/ui/logo-loader";
 
 export default function LoginPage() {
@@ -110,7 +111,7 @@ export default function LoginPage() {
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
-                  <LogoLoader size={20} className="brightness-0 invert" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Signing in...</span>
                 </div>
               ) : (

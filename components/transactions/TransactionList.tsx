@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { ArrowUpRight, ArrowDownLeft, PiggyBank, Search, Filter } from 'lucide-react';
+import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -11,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useTransactions } from '@/hooks/use-transactions';
+import { LogoLoader } from '@/components/ui/logo-loader';
 
 export function TransactionList() {
   const { data: transactionsData, isLoading: loading } = useTransactions();
@@ -61,7 +63,11 @@ export function TransactionList() {
       case 'expense':
         return <ArrowDownLeft className="h-5 w-5 text-rose-600" />;
       case 'save':
-        return <PiggyBank className="h-5 w-5 text-blue-600" />;
+        return (
+          <div className="h-5 w-5 relative">
+            <Image src="/logo/logo.png" alt="Savings" fill className="object-contain" />
+          </div>
+        );
       default:
         return <ArrowDownLeft className="h-5 w-5 text-gray-600" />;
     }
@@ -74,7 +80,7 @@ export function TransactionList() {
       case 'expense':
         return 'bg-rose-100';
       case 'save':
-        return 'bg-blue-100';
+        return 'bg-transparent'; // No background for savings
       default:
         return 'bg-gray-100';
     }
@@ -83,7 +89,11 @@ export function TransactionList() {
 
 
   if (loading) {
-     return <div className="text-center py-10">Loading transactions...</div>;
+     return (
+       <div className="flex justify-center py-20">
+         <LogoLoader size={60} />
+       </div>
+     );
   }
 
   return (

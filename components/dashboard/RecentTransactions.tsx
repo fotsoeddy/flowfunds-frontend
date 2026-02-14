@@ -2,6 +2,7 @@
 import { Card } from '@/components/ui/card';
 import { ArrowUpRight, ArrowDownLeft, PiggyBank } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Transaction {
   id: number;
@@ -34,7 +35,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
     save: {
       icon: PiggyBank,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      bgColor: 'bg-transparent',
       prefix: '→',
     },
   };
@@ -72,8 +73,14 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
             return (
               <div key={transaction.id} className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">
-                  <div className={`${config.bgColor} rounded-lg p-2`}>
-                    <Icon className={`h-5 w-5 ${config.color}`} />
+                  <div className={`${config.bgColor} rounded-lg p-2 flex items-center justify-center h-9 w-9`}>
+                    {transaction.type === 'save' ? (
+                      <div className="h-5 w-5 relative">
+                        <Image src="/logo/logo.png" alt="Savings" fill className="object-contain" />
+                      </div>
+                    ) : (
+                      <Icon className={`h-5 w-5 ${config.color}`} />
+                    )}
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">{transaction.account_name || 'Account'}</p>

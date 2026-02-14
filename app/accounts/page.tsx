@@ -4,6 +4,7 @@ import { DollarSign, Smartphone, CircleDollarSign, Building, LogOut } from 'luci
 import { AccountCard } from '@/components/accounts/AccountCard';
 import { CreditCardFront } from '@/components/dashboard/CreditCardFront';
 import { Button } from '@/components/ui/button';
+import { LogoLoader } from '@/components/ui/logo-loader';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useMemo } from 'react';
 import api from '@/lib/api';
@@ -104,6 +105,7 @@ export default function AccountsPage() {
     name: savingsAccountData.name,
     balance: Number(savingsAccountData.balance),
     icon: Building,
+    type: savingsAccountData.type,
   } : null;
 
   const totalUsable = activeAccounts.reduce((sum, acc) => sum + acc.balance, 0);
@@ -157,6 +159,15 @@ export default function AccountsPage() {
     return Array.from(dataMap.values());
   }, [transactions, user]);
 
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <LogoLoader size={80} />
+        <p className="mt-4 text-emerald-600 font-medium animate-pulse">Flowing your funds...</p>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) return null;
 

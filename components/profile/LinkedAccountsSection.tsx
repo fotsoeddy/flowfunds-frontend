@@ -32,7 +32,7 @@ import { getCarrierFromNumber } from '@/lib/utils';
 
 interface LinkedAccount {
   id: string;
-  type: 'momo' | 'om' | 'cash';
+  type: 'momo' | 'om' | 'cash' | 'savings';
   phoneNumber: string; // From backend 'number'
   isPrimary: boolean;
   label?: string; // From backend 'name'
@@ -269,10 +269,10 @@ export function LinkedAccountsSection() {
                      className="object-contain"
                    />
                   )}
-                  {account.type === 'cash' && (
+                  {account.type === 'savings' && (
                      <Image
-                     src="/cash.png"
-                     alt="Cash"
+                     src="/logo/logo.png"
+                     alt="Savings"
                      fill
                      className="object-contain"
                    />
@@ -281,7 +281,10 @@ export function LinkedAccountsSection() {
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-gray-900">
-                      {account.type === 'momo' ? 'MTN Mobile Money' : account.type === 'om' ? 'Orange Money' : account.type === 'cash' ? 'Cash Account' : account.type}
+                      {account.type === 'momo' ? 'MTN Mobile Money' : 
+                       account.type === 'om' ? 'Orange Money' : 
+                       account.type === 'cash' ? 'Cash Account' : 
+                       account.type === 'savings' ? 'Savings Account' : account.type}
                     </p>
                     {account.isPrimary && (
                       <span className="flex items-center gap-1 text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">
@@ -302,7 +305,7 @@ export function LinkedAccountsSection() {
                   size="icon"
                   onClick={() => confirmDelete(account)}
                   className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
-                  disabled={account.type === 'cash' || account.isPrimary} // Explicitly disable for Cash and Primary
+                  disabled={account.type === 'cash' || account.isPrimary || account.type === 'savings'} // Explicitly disable for Cash, Primary, and Savings
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
