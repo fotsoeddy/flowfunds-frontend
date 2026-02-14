@@ -118,19 +118,17 @@ export default function AccountsPage() {
 
     const dataMap = new Map<string, { date: string, income: number, expense: number, rawDate: Date }>();
     const today = new Date();
-    const startDate = new Date(user.created);
-    
-    // Normalize dates to midnight
     today.setHours(0, 0, 0, 0);
-    startDate.setHours(0, 0, 0, 0);
+    
+    // Start from 6 days ago to get a total of 7 days including today
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - 6);
 
-    // Initialize map with all dates from joined date to today
+    // Initialize map with the last 7 days
     const currentDate = new Date(startDate);
     while (currentDate <= today) {
         const dateArr = currentDate.toDateString().split(' ');
         const dateKey = `${dateArr[1]} ${dateArr[2]}`; // "Jan 01"
-        // Key needs to be unique if spanning years, but for visual simplicity let's stick to this or include year if needed. 
-        // Better: use ISO string YYYY-MM-DD as map key, but display formatted date.
         const isoKey = currentDate.toISOString().split('T')[0];
         
         dataMap.set(isoKey, { 
@@ -221,46 +219,41 @@ export default function AccountsPage() {
             ) : graphData.length === 0 ? (
                 <div className="h-64 flex items-center justify-center text-gray-400">No data available</div>
             ) : (
-                <div className="w-full overflow-x-auto pb-2 custom-scrollbar">
-                    {/* Width depends on number of days to ensure readability. Minimum 100% */}
-                    <div style={{ minWidth: `${Math.max(100, graphData.length * 50)}px`, height: '256px' }}> 
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={graphData} barGap={0} barCategoryGap="20%">
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                                <XAxis 
-                                    dataKey="date" 
-                                    axisLine={false} 
-                                    tickLine={false} 
-                                    tick={{ fill: '#6B7280', fontSize: 12 }}
-                                    dy={10}
-                                    interval={0} // Show all ticks if space permits, or let recharts handle it. 
-                                    // If too many, we rely on minWidth to make them spaced out.
-                                />
-                                <YAxis 
-                                    hide={true} 
-                                />
-                                <Tooltip 
-                                    cursor={{ fill: '#F3F4F6' }}
-                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                                />
-                                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }}/>
-                                <Bar 
-                                    name="Income"
-                                    dataKey="income" 
-                                    fill="#10B981" 
-                                    radius={[4, 4, 0, 0]} 
-                                    barSize={20}
-                                />
-                                <Bar 
-                                    name="Expense"
-                                    dataKey="expense" 
-                                    fill="#EF4444" 
-                                    radius={[4, 4, 0, 0]} 
-                                    barSize={20}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
+                <div className="w-full h-[256px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={graphData} barGap={4} barCategoryGap="15%">
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                            <XAxis
+                                dataKey="date"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: '#6B7280', fontSize: 10 }}
+                                dy={10}
+                            />
+                            <YAxis
+                                hide={true}
+                            />
+                            <Tooltip
+                                cursor={{ fill: '#F3F4F6', radius: 4 }}
+                                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                            />
+                            <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }}/>
+                            <Bar
+                                name="Income"
+                                dataKey="income"
+                                fill="#10B981"
+                                radius={[4, 4, 0, 0]}
+                                barSize={12}
+                            />
+                            <Bar
+                                name="Expense"
+                                dataKey="expense"
+                                fill="#EF4444"
+                                radius={[4, 4, 0, 0]}
+                                barSize={12}
+                            />
+                        </BarChart>
+                    </ResponsiveContainer>
                 </div>
             )}
         </div>
