@@ -259,7 +259,7 @@ export default function AccountsPage() {
         </div>
       </div>
 
-      {/* <div>
+      <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Savings</h2>
         {savingsAccount ? (
           <div className="space-y-4">
@@ -274,7 +274,7 @@ export default function AccountsPage() {
         ) : (
           <p className="text-gray-500 italic">No savings account found.</p>
         )}
-      </div> */}
+      </div>
     </div>
   );
 }

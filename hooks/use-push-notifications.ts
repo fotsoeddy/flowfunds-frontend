@@ -57,14 +57,8 @@ export function usePushNotifications() {
                     description: "Please enable them in your browser settings (click the lock icon in address bar).",
                     duration: 5000,
                 });
-            } else if (!sessionStorage.getItem('notification_denied_shown')) {
-                // Auto-check on load (don't spam)
-                toast.error("Notifications are blocked", {
-                    description: "Enable notifications to receive daily insights.",
-                    duration: 5000,
-                });
-                sessionStorage.setItem('notification_denied_shown', 'true');
             }
+            // Removed automatic toast as per user request
             setPermission('denied');
             setLoading(false);
             return;

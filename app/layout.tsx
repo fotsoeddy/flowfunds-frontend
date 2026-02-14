@@ -39,7 +39,6 @@ export default function RootLayout({
       <body className={`${inter.className} bg-gray-50`}>
         <ReactQueryProvider>
           <Layout>{children}</Layout>
-          <Toaster richColors position="top-right" />
         </ReactQueryProvider>
       </body>
     </html>

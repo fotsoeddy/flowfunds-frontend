@@ -49,7 +49,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <Header />
       <main className={cn("flex-1 flex flex-col", !isAuthPage ? "pb-24" : "")}>{children}</main>
       <Navigation />
-      <Toaster />
+      <Toaster richColors />
     </div>
   );
 }
