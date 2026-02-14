@@ -57,7 +57,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 }
                 
                 // Send subscription to backend
-                await api.savePushSubscription(subscription);
+                const subJSON = subscription.toJSON();
+                await api.savePushSubscription({
+                    endpoint: subJSON.endpoint,
+                    p256dh: subJSON.keys?.p256dh,
+                    auth: subJSON.keys?.auth
+                });
                 console.log('Push notification subscribed!');
             }
         } catch (error) {
