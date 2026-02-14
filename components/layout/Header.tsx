@@ -4,9 +4,15 @@ import { User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
+import { usePathname } from 'next/navigation';
 
 export function Header() {
   const { data: user } = useAuth();
+  const pathname = usePathname();
+
+  if (pathname === '/login' || pathname === '/register') {
+    return null;
+  }
 
   const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'User';
 
