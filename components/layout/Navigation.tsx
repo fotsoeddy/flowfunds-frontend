@@ -46,6 +46,9 @@ export function Navigation() {
           );
         })}
       </div>
+      <div className="text-[9px] text-center text-gray-300 pb-1">
+        Developed by <a href="https://github.com/fotseddy" target="_blank" rel="noopener noreferrer" className="text-emerald-600/50 hover:text-emerald-600 transition-colors">Eddy Steve</a>
+      </div>
     </nav>
   );
 }

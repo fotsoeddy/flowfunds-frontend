@@ -82,7 +82,7 @@ export default function DashboardPage() {
   const netWorth = accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
 
   return (
-    <div className="container px-4 py-6 pb-20">
+    <div className="container px-4 py-6 pb-10">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">
             Hello, {user?.first_name || 'User'}

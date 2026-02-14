@@ -170,7 +170,7 @@ export default function AccountsPage() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="container px-4 py-6 pb-20">
+    <div className="container px-4 py-6 pb-10">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Accounts</h1>

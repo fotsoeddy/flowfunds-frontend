@@ -8,7 +8,7 @@ interface WalletStackProps {
 }
 
 export function WalletStack({ accounts }: WalletStackProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   if (accounts.length === 0) {
     return <div className="text-gray-500 text-center py-4">No accounts found</div>;

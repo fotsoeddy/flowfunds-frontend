@@ -47,5 +47,8 @@ api.getProfile = () => axiosInstance.get("/auth/me/");
 api.getAccounts = () => axiosInstance.get("/accounts/");
 api.getTransactions = () => axiosInstance.get("/transactions/");
 api.createTransaction = (data: any) => axiosInstance.post("/transactions/", data);
+api.getBudgetLimits = () => axiosInstance.get("/budget-limits/");
+api.createBudgetLimit = (data: any) => axiosInstance.post("/budget-limits/", data);
+api.savePushSubscription = (data: any) => axiosInstance.post("/push-subscriptions/", data);
 
 export default api;
