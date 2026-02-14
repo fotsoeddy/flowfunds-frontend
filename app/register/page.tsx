@@ -104,10 +104,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center bg-gray-50 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 flex flex-col items-center">
-          <div className="w-20 h-20 relative mb-2">
+    <div className="flex-1 flex items-center justify-center bg-gray-50 px-4 py-2">
+      <Card className="w-full max-w-md border-none shadow-none bg-transparent sm:border sm:shadow-sm sm:bg-white scale-[0.95] origin-center">
+        <CardHeader className="space-y-0 flex flex-col items-center py-2">
+          <div className="w-14 h-14 relative mb-1">
             <Image 
               src="/logo/logo.png" 
               alt="FlowFunds Logo" 
@@ -122,7 +122,7 @@ export default function RegisterPage() {
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 py-2">
 
             <div className="space-y-2">
               <Label htmlFor="first_name">First Name</Label>
@@ -201,7 +201,7 @@ export default function RegisterPage() {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-4 px-0 pt-4">
+          <CardFooter className="flex flex-col gap-2 pt-2 pb-4">
             <Button 
               type="submit" 
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"

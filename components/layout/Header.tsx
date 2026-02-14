@@ -8,12 +8,6 @@ import { usePathname } from 'next/navigation';
 
 export function Header() {
   const { data: user } = useAuth();
-  const pathname = usePathname();
-
-  if (pathname === '/login' || pathname === '/register') {
-    return null;
-  }
-
   const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'User';
 
   return (

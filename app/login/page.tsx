@@ -48,10 +48,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center bg-gray-50 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 flex flex-col items-center">
-          <div className="w-20 h-20 relative mb-2">
+    <div className="flex-1 flex items-center justify-center bg-gray-50 px-4 py-4">
+      <Card className="w-full max-w-md border-none shadow-none bg-transparent sm:border sm:shadow-sm sm:bg-white">
+        <CardHeader className="space-y-1 flex flex-col items-center py-2">
+          <div className="w-16 h-16 relative mb-1">
             <Image 
               src="/logo/logo.png" 
               alt="FlowFunds Logo" 
@@ -103,7 +103,7 @@ export default function LoginPage() {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4 pt-4">
+          <CardFooter className="flex flex-col space-y-3 pt-2 pb-4">
             <Button 
               type="submit" 
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"

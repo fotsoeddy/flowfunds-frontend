@@ -15,13 +15,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen max-w-md mx-auto bg-white flex flex-col">
-      {!isAuthPage && <Header />}
-      <main className={cn("flex-1", !isAuthPage ? "pb-24" : "")}>{children}</main>
-      {!isAuthPage && (
-        <footer className="pb-20 text-center text-[10px] text-gray-400">
-          Developed by <a href="https://github.com/fotseddy" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">Eddy Steve</a>
-        </footer>
-      )}
+      <Header />
+      <main className={cn("flex-1 flex flex-col", !isAuthPage ? "pb-24" : "")}>{children}</main>
+      <footer className={cn("text-center text-[10px] text-gray-400 p-4", !isAuthPage ? "pb-20" : "pb-4")}>
+        Developed by <a href="https://github.com/fotseddy" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">Eddy Steve</a>
+      </footer>
       <Navigation />
     </div>
   );
